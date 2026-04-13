@@ -25,9 +25,9 @@ export default function ProjectPage() {
 
       <ViewSwitcher activeView={activeView} onViewChange={setActiveView} />
 
-      <div className="mt-4" onClick={() => setIsDrawerOpen(true)}>
-        {activeView === "Board" && <KanbanBoard />}
-        {activeView === "List" && <ListView />}
+      <div className="mt-4">
+        {activeView === "Board" && <KanbanBoard onTaskClick={() => setIsDrawerOpen(true)} />}
+        {activeView === "List" && <ListView onTaskClick={() => setIsDrawerOpen(true)} />}
         {activeView === "Timeline" && <TimelineView />}
         {activeView === "Calendar" && (
           <div className="h-96 flex items-center justify-center bg-white border border-dashed border-border-base rounded-card text-muted">

@@ -48,7 +48,7 @@ const initialData: Column[] = [
   },
 ];
 
-export function KanbanBoard() {
+export function KanbanBoard({ onTaskClick }: { onTaskClick?: () => void }) {
   return (
     <div className="flex gap-6 overflow-x-auto pb-4 h-[calc(100vh-250px)]">
       {initialData.map((column) => (
@@ -65,7 +65,7 @@ export function KanbanBoard() {
 
           <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
             {column.tasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
+              <TaskCard key={task.id} task={task} onClick={onTaskClick} />
             ))}
 
             <button className="w-full py-2 flex items-center justify-center gap-2 text-muted hover:text-accent hover:bg-white rounded-badge border border-transparent hover:border-border-base transition-all text-sm group">

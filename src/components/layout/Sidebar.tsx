@@ -15,10 +15,12 @@ import {
   Layers
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PresenceIndicator } from "@/components/PresenceIndicator";
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/" },
   { label: "Projects", icon: Kanban, href: "/projects" },
+  { label: "Leads", icon: Sparkles, href: "/leads" },
   { label: "Time & Billing", iconComp: Clock, href: "/billing" },
   { label: "Team", iconComp: Users, href: "/team" },
   { label: "Settings", iconComp: Settings, href: "/settings" },
@@ -50,7 +52,7 @@ export function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 py-4 px-2 space-y-1">
+      <nav className="flex-1 py-4 px-2 space-y-1 flex flex-col">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.iconComp || (item.icon as React.ElementType);
@@ -70,6 +72,8 @@ export function Sidebar() {
             </Link>
           );
         })}
+
+        {!isCollapsed && <PresenceIndicator />}
       </nav>
 
       {/* Footer */}

@@ -12,7 +12,7 @@ const tasks = [
   { id: "AX-98", title: "QA Mobile responsiveness", status: "In Review", statusColor: "bg-status-review-bg text-status-review-text", priority: "P3", priorityColor: "#CA8A04", assignee: "JD", dueDate: "Jan 22", project: "Axis Platform" },
 ];
 
-export function ListView() {
+export function ListView({ onTaskClick }: { onTaskClick?: () => void }) {
   return (
     <div className="bg-white border border-border-base rounded-card overflow-hidden">
       <table className="w-full text-left border-collapse">
@@ -34,7 +34,11 @@ export function ListView() {
         </thead>
         <tbody className="divide-y divide-border-base">
           {tasks.map((task) => (
-            <tr key={task.id} className="group hover:bg-surface-2 transition-colors cursor-pointer text-sm">
+            <tr
+              key={task.id}
+              className="group hover:bg-surface-2 transition-colors cursor-pointer text-sm"
+              onClick={onTaskClick}
+            >
               <td className="px-6 py-3"><input type="checkbox" className="rounded" /></td>
               <td className="px-4 py-3 font-medium text-primary">{task.title}</td>
               <td className="px-4 py-3">

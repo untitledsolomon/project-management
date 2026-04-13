@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { LiveTaskPresence } from "@/components/PresenceIndicator";
 
 export function TaskDetailDrawer({
   isOpen,
@@ -40,7 +41,10 @@ export function TaskDetailDrawer({
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-border-base">
-              <span className="font-mono text-xs text-muted uppercase tracking-widest">{taskId}</span>
+              <div className="flex items-center gap-4">
+                <span className="font-mono text-xs text-muted uppercase tracking-widest">{taskId}</span>
+                <LiveTaskPresence taskId={taskId} />
+              </div>
               <div className="flex items-center gap-2">
                 <button className="p-1.5 text-muted hover:text-primary hover:bg-surface-2 rounded-badge transition-colors">
                   <MoreHorizontal size={18} />
@@ -116,7 +120,7 @@ export function TaskDetailDrawer({
                       )}>
                         {sub.done && <CheckSquare size={10} />}
                       </div>
-                      <span className={cn("text-sm", sub.done ? "text-muted line-through" : "text-primary") as any}>{sub.title}</span>
+                      <span className={cn("text-sm", sub.done ? "text-muted line-through" : "text-primary")}>{sub.title}</span>
                     </div>
                   ))}
                 </div>
