@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-primary: #0A0A0B;
+  --color-secondary: #4A4A52;
+  --color-muted: #9090A0;
+
+  --color-surface-1: #FFFFFF;
+  --color-surface-2: #F7F7F8;
+  --color-surface-3: #F0F0F2;
+
+  --color-accent: #3D3BF3;
+
+  /* Status Colors */
+  --color-status-todo-bg: #E4E4E7;
+  --color-status-todo-text: #70707A;
+  --color-status-progress-bg: #EEF2FF;
+  --color-status-progress-text: #3D3BF3;
+  --color-status-review-bg: #FFF7ED;
+  --color-status-review-text: #C2410C;
+  --color-status-done-bg: #F0FDF4;
+  --color-status-done-text: #15803D;
+  --color-status-blocked-bg: #FFF1F2;
+  --color-status-blocked-text: #BE123C;
+
+  /* Priority Colors */
+  --color-p1: #BE123C;
+  --color-p2: #EA580C;
+  --color-p3: #CA8A04;
+  --color-p4: #9090A0;
+
+  /* Borders */
+  --color-border-base: #E4E4E7;
+
+  /* Shadows */
+  --shadow-axis: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+
+  /* Typography */
+  --font-display: "Instrument Serif", serif;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Radius */
+  --radius-card: 8px;
+  --radius-button: 6px;
+  --radius-input: 6px;
+  --radius-badge: 4px;
+}
+
+:root {
+  --background: #FFFFFF;
+  --foreground: #0A0A0B;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 400;
+  }
+}
