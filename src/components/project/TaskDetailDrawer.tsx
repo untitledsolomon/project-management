@@ -9,6 +9,7 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { LiveTaskPresence } from "@/components/PresenceIndicator";
+import { RichTextEditor } from "./RichTextEditor";
 
 export function TaskDetailDrawer({
   isOpen,
@@ -89,15 +90,10 @@ export function TaskDetailDrawer({
               {/* Description Section */}
               <div className="px-6 py-4">
                 <h3 className="text-xs font-mono uppercase tracking-widest text-muted mb-4">Description</h3>
-                <div className="text-sm text-secondary leading-relaxed min-h-[100px] cursor-text">
-                  <p>Comprehensive refresh of the brand guidelines including:</p>
-                  <ul className="list-disc ml-4 mt-2 space-y-1">
-                    <li>Updated typography scale using Instrument Serif</li>
-                    <li>Refined color palette with indigo accents</li>
-                    <li>Component-based layout system for web/mobile</li>
-                  </ul>
-                  <p className="mt-4 text-muted/60">Click to add more details...</p>
-                </div>
+                <RichTextEditor
+                  content="<p>Comprehensive refresh of the brand guidelines including:</p><ul><li>Updated typography scale using Instrument Serif</li><li>Refined color palette with indigo accents</li><li>Component-based layout system for web/mobile</li></ul>"
+                  onChange={(val) => console.log(val)}
+                />
               </div>
 
               {/* Subtasks Section */}

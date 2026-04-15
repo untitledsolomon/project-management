@@ -1,3 +1,5 @@
+"use client";
+
 import { MainLayout } from "@/components/layout/MainLayout";
 import { KPICards } from "@/components/dashboard/KPICards";
 import { MyTasks } from "@/components/dashboard/MyTasks";
@@ -8,14 +10,11 @@ import { Badge } from "@/components/ui/Badge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { AvatarGroup, Avatar } from "@/components/ui/Avatar";
 import { MoreHorizontal } from "lucide-react";
-
-const projects = [
-  { name: "Axis Platform", client: "Internal", progress: 65, tasks: 24, status: "In Progress", statusColor: "text-status-progress-text bg-status-progress-bg" },
-  { name: "Regent Portal", client: "Regent CAD", progress: 92, tasks: 4, status: "In Review", statusColor: "text-status-review-text bg-status-review-bg" },
-  { name: "Forge CMS", client: "Forge Inc.", progress: 12, tasks: 45, status: "In Progress", statusColor: "text-status-progress-text bg-status-progress-bg" },
-];
+import { useWorkspace } from "@/components/providers/WorkspaceProvider";
+import Link from "next/link";
 
 export default function Home() {
+  const { projects } = useWorkspace();
   return (
     <MainLayout title="Dashboard">
       <div className="mb-8">
@@ -42,7 +41,8 @@ export default function Home() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projects.map((project) => (
-          <Card key={project.name} className="hover:border-accent/50 transition-colors cursor-pointer group">
+          <Link key={project.id} href={`/projects/${project.id}`}>
+          <Card className="hover:border-accent/50 transition-colors cursor-pointer group">
             <CardContent className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
@@ -75,6 +75,7 @@ export default function Home() {
               </div>
             </CardContent>
           </Card>
+          </Link>
         ))}
       </div>
     </MainLayout>

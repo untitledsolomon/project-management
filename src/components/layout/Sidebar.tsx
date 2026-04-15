@@ -34,6 +34,7 @@ export function Sidebar() {
     <aside
       className={cn(
         "fixed left-0 top-0 h-full bg-white border-r border-border-base transition-all duration-300 z-50 flex flex-col",
+        "hidden lg:flex",
         isCollapsed ? "w-[64px]" : "w-[256px]"
       )}
     >

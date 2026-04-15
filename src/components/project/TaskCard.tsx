@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/Badge";
 import { Avatar } from "@/components/ui/Avatar";
 import { MessageSquare, Paperclip, CheckSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 export interface Task {
   id: string;
@@ -29,10 +31,32 @@ const priorityColors = {
 };
 
 export function TaskCard({ task, onClick }: TaskCardProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
   return (
     <Card
-      className="mb-3 hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing group relative"
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "mb-3 hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing group relative",
+        isDragging && "z-50 shadow-xl border-accent"
+      )}
       onClick={onClick}
+      {...attributes}
+      {...listeners}
     >
       <div className="absolute left-0 top-0 bottom-0 w-1 bg-transparent group-hover:bg-accent/20 transition-colors rounded-l-card" />
       <CardContent className="p-4">
