@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 export interface Task {
   id: string;
@@ -45,6 +46,8 @@ interface WorkspaceContextType {
   projects: Project[];
   leads: Lead[];
   addTask: (task: Omit<Task, "id" | "comments" | "attachments">) => void;
+  addProject: (project: Omit<Project, "id">) => void;
+  addLead: (lead: Omit<Lead, "id">) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
   convertLead: (leadId: string) => void;
   isLoading: boolean;
@@ -67,16 +70,26 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   ]);
 
   const [leads, setLeads] = React.useState<Lead[]>([
-    { id: "lead-1", company: "Global Motors", type: "Manufacturing", value: "$45k", status: "Negotiation", confidence: 85, icon: "🏭" },
-    { id: "lead-2", company: "Horizon Tech", type: "SaaS", value: "$120k", status: "Qualified", confidence: 60, icon: "☁️" },
-    { id: "lead-3", company: "Lunar Optics", type: "R&D", value: "$28k", status: "Discovery", confidence: 45, icon: "🔭" },
+    { id: "lead-1", company: "Global Motors", type: "Manufacturing", value: "5k", status: "Negotiation", confidence: 85, icon: "🏭" },
+    { id: "lead-2", company: "Horizon Tech", type: "SaaS", value: "20k", status: "Qualified", confidence: 60, icon: "☁️" },
+    { id: "lead-3", company: "Lunar Optics", type: "R&D", value: "8k", status: "Discovery", confidence: 45, icon: "🔭" },
   ]);
 
   const [isLoading, setIsLoading] = React.useState(false);
 
-  // Load initial data from Supabase if configured
+  // Persistence logic (Local Storage + Supabase fallback)
   React.useEffect(() => {
     const fetchInitialData = async () => {
+      // 1. Try Local Storage first for speed
+      const savedTasks = localStorage.getItem("axis_tasks");
+      const savedProjects = localStorage.getItem("axis_projects");
+      const savedLeads = localStorage.getItem("axis_leads");
+
+      if (savedTasks) setTasks(JSON.parse(savedTasks));
+      if (savedProjects) setProjects(JSON.parse(savedProjects));
+      if (savedLeads) setLeads(JSON.parse(savedLeads));
+
+      // 2. Sync with Supabase if configured
       if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return;
 
       setIsLoading(true);
@@ -98,14 +111,46 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     fetchInitialData();
   }, []);
 
+  // Save to localStorage whenever state changes
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("axis_tasks", JSON.stringify(tasks));
+      localStorage.setItem("axis_projects", JSON.stringify(projects));
+      localStorage.setItem("axis_leads", JSON.stringify(leads));
+    }
+  }, [tasks, projects, leads]);
+
   const addTask = async (task: Omit<Task, "id" | "comments" | "attachments">) => {
-    const newId = `AX-${Math.floor(100 + Math.random() * 900)}`;
+    const newId = "AX-" + Math.floor(100 + Math.random() * 900);
     const newTask = { ...task, id: newId, comments: 0, attachments: 0 } as Task;
 
     setTasks([...tasks, newTask]);
+    toast.success("Task " + newId + " created successfully");
 
     if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
       await supabase.from('tasks').insert([newTask]);
+    }
+  };
+
+  const addLead = async (lead: Omit<Lead, "id">) => {
+    const newId = "lead-" + Math.floor(100 + Math.random() * 900);
+    const newLead = { ...lead, id: newId } as Lead;
+    setLeads([...leads, newLead]);
+    toast.success("Lead for " + lead.company + " added to pipeline");
+
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      await supabase.from('leads').insert([newLead]);
+    }
+  };
+
+  const addProject = async (project: Omit<Project, "id">) => {
+    const newId = project.name.toLowerCase().replace(/\s+/g, "-");
+    const newProject = { ...project, id: newId } as Project;
+    setProjects([...projects, newProject]);
+    toast.success("Project " + project.name + " initialized");
+
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      await supabase.from('projects').insert([newProject]);
     }
   };
 
@@ -133,10 +178,21 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
     setProjects([...projects, newProject]);
     setLeads(leads.filter(l => l.id !== leadId));
+    toast.success("Lead converted: " + lead.company + " is now an active project");
   };
 
   return (
-    <WorkspaceContext.Provider value={{ tasks, projects, leads, addTask, updateTask, convertLead, isLoading }}>
+    <WorkspaceContext.Provider value={{
+      tasks,
+      projects,
+      leads,
+      addTask,
+      addProject,
+      addLead,
+      updateTask,
+      convertLead,
+      isLoading
+    }}>
       {children}
     </WorkspaceContext.Provider>
   );

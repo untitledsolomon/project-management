@@ -20,6 +20,7 @@ export function RichTextEditor({
         placeholder: "Add a description...",
       }),
     ],
+    immediatelyRender: false,
     content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());

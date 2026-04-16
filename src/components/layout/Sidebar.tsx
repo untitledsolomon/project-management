@@ -61,6 +61,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              title={isCollapsed ? item.label : ""}
               className={cn(
                 "flex items-center h-9 px-3 rounded-badge transition-colors",
                 isActive

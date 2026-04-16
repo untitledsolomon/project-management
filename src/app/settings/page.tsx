@@ -12,8 +12,7 @@ import {
   Link as LinkIcon,
   Bell,
   Globe,
-  Code,
-  Check
+  Code
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";

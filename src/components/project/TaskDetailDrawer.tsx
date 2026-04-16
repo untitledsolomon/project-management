@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { X, Clock, Play, Pause, MoreHorizontal, Paperclip, ChevronDown, CheckSquare, MessageSquare } from "lucide-react";
+import { X, Play, Pause, MoreHorizontal, Paperclip, ChevronDown, CheckSquare, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -21,6 +21,28 @@ export function TaskDetailDrawer({
   taskId?: string;
 }) {
   const [isTimerRunning, setIsTimerRunning] = React.useState(false);
+  const [time, setTime] = React.useState(15735); // 04:22:15 in seconds
+
+  React.useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | undefined;
+    if (isTimerRunning) {
+      interval = setInterval(() => {
+        setTime((t) => t + 1);
+      }, 1000);
+    } else {
+      if (interval) clearInterval(interval);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isTimerRunning]);
+
+  const formatTime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
 
   return (
     <AnimatePresence>
@@ -59,7 +81,11 @@ export function TaskDetailDrawer({
             <div className="flex-1 overflow-y-auto custom-scrollbar">
               {/* Title Section */}
               <div className="px-6 py-6">
-                <h2 className="text-2xl font-display text-primary mb-2 focus:outline-none focus:underline decoration-accent/30 underline-offset-4" contentEditable>
+                <h2
+                  className="text-2xl font-display text-primary mb-2 focus:outline-none focus:underline decoration-accent/30 underline-offset-4"
+                  contentEditable
+                  suppressContentEditableWarning={true}
+                >
                   Finalize brand guidelines
                 </h2>
                 <div className="flex flex-wrap gap-2 mt-4">
@@ -172,9 +198,10 @@ export function TaskDetailDrawer({
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] font-mono text-muted uppercase">Time Tracked</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-mono font-bold">04:22:15</span>
+                    <span className="text-sm font-mono font-bold">{formatTime(time)}</span>
                     <button
                       onClick={() => setIsTimerRunning(!isTimerRunning)}
+                      aria-label={isTimerRunning ? "Pause" : "Start"}
                       className={cn(
                         "h-8 w-8 rounded-full flex items-center justify-center transition-all",
                         isTimerRunning ? "bg-p1 text-white" : "bg-accent text-white"

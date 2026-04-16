@@ -17,6 +17,25 @@ export function ListView({ onTaskClick }: { onTaskClick?: () => void }) {
     spacious: "py-5 px-4 text-base",
   };
 
+  const [isAdding, setIsAdding] = React.useState(false);
+  const [newTaskTitle, setNewTaskTitle] = React.useState("");
+  const { addTask } = useWorkspace();
+
+  const handleAddTask = () => {
+    if (!newTaskTitle.trim()) return;
+    addTask({
+      title: newTaskTitle,
+      status: "todo",
+      priority: "P3",
+      assignee: { name: "Solomon", fallback: "SK" },
+      dueDate: "Tomorrow",
+      project: "Axis Platform",
+      subtasks: { completed: 0, total: 0 }
+    });
+    setNewTaskTitle("");
+    setIsAdding(false);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-end gap-2 px-1">
@@ -107,7 +126,30 @@ export function ListView({ onTaskClick }: { onTaskClick?: () => void }) {
         </tbody>
       </table>
       <div className="p-3 border-t border-border-base bg-surface-1">
-        <button className="text-xs text-accent font-medium hover:underline ml-12">+ Add new task</button>
+        {isAdding ? (
+          <div className="flex items-center gap-3 ml-12 pr-6">
+            <input
+              autoFocus
+              className="flex-1 h-8 bg-white border border-accent rounded px-3 text-xs outline-none shadow-sm"
+              placeholder="What needs to be done?"
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAddTask();
+                if (e.key === "Escape") setIsAdding(false);
+              }}
+            />
+            <button onClick={handleAddTask} className="text-xs font-semibold text-accent">Save</button>
+            <button onClick={() => setIsAdding(false)} className="text-xs text-muted">Cancel</button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setIsAdding(true)}
+            className="text-xs text-accent font-medium hover:underline ml-12"
+          >
+            + Add new task
+          </button>
+        )}
       </div>
     </div>
     </div>

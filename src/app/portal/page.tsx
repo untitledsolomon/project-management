@@ -11,8 +11,6 @@ import {
   MessageSquare,
   Download,
   CheckCircle2,
-  Clock,
-  ChevronRight,
   Layers
 } from "lucide-react";
 import { cn } from "@/lib/utils";

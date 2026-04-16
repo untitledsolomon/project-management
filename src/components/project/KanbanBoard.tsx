@@ -31,6 +31,24 @@ function KanbanColumn({ column, tasks, onTaskClick }: KanbanColumnProps) {
   const { setNodeRef } = useDroppable({
     id: column.id,
   });
+  const [isAdding, setIsAdding] = React.useState(false);
+  const [title, setTitle] = React.useState("");
+  const { addTask } = useWorkspace();
+
+  const handleAdd = () => {
+    if (!title.trim()) return;
+    addTask({
+      title,
+      status: column.id,
+      priority: "P3",
+      assignee: { name: "Solomon", fallback: "SK" },
+      dueDate: "Tomorrow",
+      project: "Axis Platform",
+      subtasks: { completed: 0, total: 0 }
+    });
+    setTitle("");
+    setIsAdding(false);
+  };
 
   return (
     <div ref={setNodeRef} className="w-80 flex-shrink-0 flex flex-col">
@@ -51,10 +69,34 @@ function KanbanColumn({ column, tasks, onTaskClick }: KanbanColumnProps) {
           ))}
         </SortableContext>
 
-        <button className="w-full py-2 flex items-center justify-center gap-2 text-muted hover:text-accent hover:bg-white rounded-badge border border-transparent hover:border-border-base transition-all text-sm group">
-          <Plus size={16} className="group-hover:scale-110 transition-transform" />
-          <span>Add task</span>
-        </button>
+        {isAdding ? (
+          <div className="bg-white p-3 rounded-card border border-accent shadow-sm mb-3">
+            <textarea
+              autoFocus
+              className="w-full text-sm outline-none resize-none mb-2"
+              placeholder="Task title..."
+              rows={2}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleAdd(); }
+                if (e.key === "Escape") setIsAdding(false);
+              }}
+            />
+            <div className="flex gap-2">
+              <button onClick={handleAdd} className="text-[10px] font-bold text-accent uppercase">Add</button>
+              <button onClick={() => setIsAdding(false)} className="text-[10px] font-bold text-muted uppercase">Cancel</button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setIsAdding(true)}
+            className="w-full py-2 flex items-center justify-center gap-2 text-muted hover:text-accent hover:bg-white rounded-badge border border-transparent hover:border-border-base transition-all text-sm group"
+          >
+            <Plus size={16} className="group-hover:scale-110 transition-transform" />
+            <span>Add task</span>
+          </button>
+        )}
       </div>
     </div>
   );

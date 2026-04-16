@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -99,7 +99,9 @@ export default function LeadsPage() {
                     <Button
                       size="sm"
                       className="gap-2 bg-accent"
-                      onClick={() => convertLead(lead.id)}
+                      onClick={() => {
+                        convertLead(lead.id);
+                      }}
                     >
                       <Zap size={14} /> Convert to Project
                     </Button>
