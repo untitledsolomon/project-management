@@ -8,21 +8,11 @@ import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { useWorkspace } from "@/components/providers/WorkspaceProvider";
 import {
-  Building2,
-  ArrowRight,
-  ExternalLink,
   FileText,
   Zap,
-  CheckCircle2,
-  MoreHorizontal
+  CheckCircle2
 } from "lucide-react";
 import { motion } from "framer-motion";
-
-const leads = [
-  { company: "Global Motors", type: "Manufacturing", value: "$45k", status: "Negotiation", confidence: 85, icon: "🏭" },
-  { company: "Horizon Tech", type: "SaaS", value: "$120k", status: "Qualified", confidence: 60, icon: "☁️" },
-  { company: "Lunar Optics", type: "R&D", value: "$28k", status: "Discovery", confidence: 45, icon: "🔭" },
-];
 
 export default function LeadsPage() {
   const { leads, convertLead } = useWorkspace();

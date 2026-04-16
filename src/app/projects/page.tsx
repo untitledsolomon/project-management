@@ -15,6 +15,7 @@ import { CreateTaskDialog } from "@/components/project/CreateTaskDialog";
 export default function ProjectsPage() {
   const { projects } = useWorkspace();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+
   return (
     <MainLayout title="Projects">
       <div className="mb-8 flex items-center justify-between">

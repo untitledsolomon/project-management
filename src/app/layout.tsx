@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Inter, Geist_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { CommandPalette } from "@/components/CommandPalette";
 import { WorkspaceProvider } from "@/components/providers/WorkspaceProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -33,7 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} h-full antialiased`}
+      className={`${inter.variable} ${geistMono.variable} ${instrumentSerif.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-surface-1 text-primary">
         <WorkspaceProvider>

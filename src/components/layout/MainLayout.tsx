@@ -12,7 +12,7 @@ export function MainLayout({
   title?: string;
 }) {
   return (
-    <div className="flex min-h-screen bg-surface-2">
+    <div className="flex min-h-screen bg-surface-2 group">
       <Sidebar />
       <div className="flex-1 flex flex-col transition-all duration-300 lg:ml-[256px] group-has-[aside.w-\[64px\]]:lg:ml-[64px]">
         <Topbar title={title} />

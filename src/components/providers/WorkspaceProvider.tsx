@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { supabase } from "@/lib/supabase";
 
 export interface Task {
   id: string;
@@ -14,6 +15,9 @@ export interface Task {
   attachments: number;
   subtasks: { completed: number; total: number };
   description?: string;
+  start?: number;
+  duration?: number;
+  dependencies?: string[];
 }
 
 export interface Project {
@@ -43,6 +47,7 @@ interface WorkspaceContextType {
   addTask: (task: Omit<Task, "id" | "comments" | "attachments">) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
   convertLead: (leadId: string) => void;
+  isLoading: boolean;
 }
 
 const WorkspaceContext = React.createContext<WorkspaceContextType | undefined>(undefined);
@@ -67,13 +72,49 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     { id: "lead-3", company: "Lunar Optics", type: "R&D", value: "$28k", status: "Discovery", confidence: 45, icon: "🔭" },
   ]);
 
-  const addTask = (task: Omit<Task, "id" | "comments" | "attachments">) => {
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  // Load initial data from Supabase if configured
+  React.useEffect(() => {
+    const fetchInitialData = async () => {
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return;
+
+      setIsLoading(true);
+      try {
+        const { data: tasksData } = await supabase.from('tasks').select('*');
+        const { data: projectsData } = await supabase.from('projects').select('*');
+        const { data: leadsData } = await supabase.from('leads').select('*');
+
+        if (tasksData) setTasks(tasksData);
+        if (projectsData) setProjects(projectsData);
+        if (leadsData) setLeads(leadsData);
+      } catch (error) {
+        console.error("Error fetching data from Supabase:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchInitialData();
+  }, []);
+
+  const addTask = async (task: Omit<Task, "id" | "comments" | "attachments">) => {
     const newId = `AX-${Math.floor(100 + Math.random() * 900)}`;
-    setTasks([...tasks, { ...task, id: newId, comments: 0, attachments: 0 } as Task]);
+    const newTask = { ...task, id: newId, comments: 0, attachments: 0 } as Task;
+
+    setTasks([...tasks, newTask]);
+
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      await supabase.from('tasks').insert([newTask]);
+    }
   };
 
-  const updateTask = (id: string, updates: Partial<Task>) => {
+  const updateTask = async (id: string, updates: Partial<Task>) => {
     setTasks(tasks.map(t => t.id === id ? { ...t, ...updates } : t));
+
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      await supabase.from('tasks').update(updates).eq('id', id);
+    }
   };
 
   const convertLead = (leadId: string) => {
@@ -95,7 +136,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <WorkspaceContext.Provider value={{ tasks, projects, leads, addTask, updateTask, convertLead }}>
+    <WorkspaceContext.Provider value={{ tasks, projects, leads, addTask, updateTask, convertLead, isLoading }}>
       {children}
     </WorkspaceContext.Provider>
   );

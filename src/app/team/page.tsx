@@ -2,11 +2,11 @@
 
 import * as React from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Plus, Mail, Shield, MoreHorizontal } from "lucide-react";
+import { Plus, Shield, MoreHorizontal } from "lucide-react";
 
 const team = [
   { name: "Solomon K.", role: "Lead Designer", email: "solomon@axis.com", status: "Active", access: "Admin", fallback: "SK" },

@@ -37,7 +37,7 @@ export function CommandPalette() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsOpen(false)}
-            className="fixed inset-0 bg-white/60 backdrop-blur-md z-[200]"
+            className="fixed inset-0 bg-white/85 backdrop-blur-[8px] z-[200]"
           />
           <div className="fixed inset-0 z-[201] flex items-start justify-center pt-[15vh] pointer-events-none">
             <motion.div
