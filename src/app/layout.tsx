@@ -1,22 +1,20 @@
-import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
-import { Instrument_Serif } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { CommandPalette } from "@/components/CommandPalette";
-import { WorkspaceProvider } from "@/components/providers/WorkspaceProvider";
-import { Toaster } from "sonner";
+import AppProviders from "@/providers/AppProviders";
 
-
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-display",
-  weight: "400",
+const geistSans = Geist({
+  variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Axis | Project Management",
-  description: "A premium project management platform for high-performance teams.",
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata = {
+  title: "Regent Project Manager",
+  description: "Modern project management for high-performance teams",
 };
 
 export default function RootLayout({
@@ -25,17 +23,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${GeistSans.variable} ${GeistMono.variable} ${instrumentSerif.variable} h-full antialiased`}
-      suppressHydrationWarning
-    >
-      <body className="min-h-full flex flex-col bg-surface-1 text-primary">
-        <WorkspaceProvider>
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}>
+        <AppProviders>
           {children}
-          <CommandPalette />
-          <Toaster position="bottom-right" />
-        </WorkspaceProvider>
+        </AppProviders>
       </body>
     </html>
   );
