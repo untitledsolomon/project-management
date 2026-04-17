@@ -66,3 +66,29 @@ Supabase credentials missing. Data persistence will be disabled.
  ✓ Compiled in 347ms (443 modules)
  ✓ Compiled in 5.4s (443 modules)
  ✓ Compiled in 614ms (443 modules)
+ ✓ Compiled in 1751ms (443 modules)
+ ✓ Compiled in 470ms (443 modules)
+ ✓ Compiled in 345ms (443 modules)
+ ✓ Compiled in 519ms (443 modules)
+ ✓ Compiled in 255ms (443 modules)
+ ✓ Compiled in 252ms (443 modules)
+ ✓ Compiled in 1416ms (885 modules)
+ ✓ Compiled in 287ms (444 modules)
+ ✓ Compiled in 240ms (444 modules)
+ ✓ Compiled in 432ms (444 modules)
+ ✓ Compiled in 206ms (444 modules)
+ ✓ Compiled in 955ms (444 modules)
+ ✓ Compiled in 340ms (444 modules)
+ ✓ Compiled in 695ms (444 modules)
+ ✓ Compiled in 324ms (444 modules)
+ ✓ Compiled in 291ms (444 modules)
+ ✓ Compiled in 1028ms (871 modules)
+ ✓ Compiled in 198ms (444 modules)
+ ✓ Compiled in 246ms (444 modules)
+ ✓ Compiled in 288ms (444 modules)
+Supabase credentials missing. Data persistence will be disabled.
+ GET /auth/login 200 in 727ms
+ ○ Compiling /projects ...
+ ✓ Compiled /projects in 689ms (470 modules)
+Supabase credentials missing. Data persistence will be disabled.
+ GET /projects 200 in 1121ms

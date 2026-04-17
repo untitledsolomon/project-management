@@ -8,8 +8,11 @@ import { Plus, MoreHorizontal, User, Calendar } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { NewProjectModal } from "@/components/project/NewProjectModal";
+import { useState } from "react";
 
 export default function ProjectsPage() {
+  const [newProjectModalOpen, setNewProjectModalOpen] = useState(false);
   const { data: projects, isLoading } = useProjects();
 
   return (
@@ -17,7 +20,7 @@ export default function ProjectsPage() {
       title="Projects"
       description="Manage and track all your organisation's projects"
       action={
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => setNewProjectModalOpen(true)}>
           <Plus size={18} />
           New Project
         </Button>
@@ -86,6 +89,10 @@ export default function ProjectsPage() {
           ))
         )}
       </div>
+      <NewProjectModal
+        open={newProjectModalOpen}
+        onOpenChange={setNewProjectModalOpen}
+      />
     </MainLayout>
   );
 }

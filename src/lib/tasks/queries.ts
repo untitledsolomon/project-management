@@ -38,6 +38,33 @@ async function logActivity(org_id: string, project_id: string, task_id: string, 
   });
 }
 
+export function useUserTasks() {
+  const { data: { user } } = useQuery({
+    queryKey: ['auth-user'],
+    queryFn: async () => {
+      const { data } = await supabase.auth.getUser();
+      return data;
+    }
+  });
+
+  return useQuery({
+    queryKey: ['my-tasks', user?.user?.id],
+    queryFn: async () => {
+      if (!user?.user?.id) return [];
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .contains('assignee_ids', [user.user.id])
+        .is('archived_at', null)
+        .order('due_date', { ascending: true });
+
+      if (error) throw error;
+      return data as Task[];
+    },
+    enabled: !!user?.user?.id,
+  });
+}
+
 export function useProjectTasks(projectId: string) {
   const queryClient = useQueryClient();
 
@@ -48,6 +75,7 @@ export function useProjectTasks(projectId: string) {
         .from('tasks')
         .select('*')
         .eq('project_id', projectId)
+        .is('archived_at', null)
         .order('position', { ascending: true });
 
       if (error) throw error;
@@ -108,6 +136,114 @@ export function useCreateTask() {
     },
     onSuccess: (data) => {
       queryClient.setQueryData(['tasks', data.project_id], (old: Task[] | undefined) => [...(old || []), data]);
+    },
+  });
+}
+
+export interface TaskComment {
+  id: string;
+  task_id: string;
+  org_id: string;
+  user_id: string;
+  body: string;
+  parent_comment_id: string | null;
+  created_at: string;
+  updated_at: string;
+  user?: {
+    full_name: string;
+    avatar_url: string;
+  };
+}
+
+export function useSubtasks(parentTaskId: string) {
+  return useQuery({
+    queryKey: ['subtasks', parentTaskId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('parent_task_id', parentTaskId)
+        .is('archived_at', null)
+        .order('position', { ascending: true });
+
+      if (error) throw error;
+      return data as Task[];
+    },
+    enabled: !!parentTaskId,
+  });
+}
+
+export function useTaskComments(taskId: string) {
+  return useQuery({
+    queryKey: ['comments', taskId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('task_comments')
+        .select('*, user:users(full_name, avatar_url)')
+        .eq('task_id', taskId)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      return data as TaskComment[];
+    },
+    enabled: !!taskId,
+  });
+}
+
+export function useCreateComment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ taskId, body, orgId }: { taskId: string; body: string; orgId: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .from('task_comments')
+        .insert({
+          task_id: taskId,
+          body,
+          org_id: orgId,
+          user_id: user.id
+        })
+        .select('*, user:users(full_name, avatar_url)')
+        .single();
+
+      if (error) throw error;
+
+      await logActivity(orgId, '', taskId, 'comment', 'body', '', body);
+
+      return data as TaskComment;
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(['comments', data.task_id], (old: TaskComment[] | undefined) => [...(old || []), data]);
+    },
+  });
+}
+
+export function useDeleteTask() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (task: Task) => {
+      // Soft delete: set archived_at
+      const { data, error } = await supabase
+        .from('tasks')
+        .update({ archived_at: new Date().toISOString() })
+        .eq('id', task.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await logActivity(task.org_id, task.project_id, task.id, 'archive');
+
+      return data as Task;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', data.project_id] });
+      queryClient.invalidateQueries({ queryKey: ['task', data.id] });
     },
   });
 }

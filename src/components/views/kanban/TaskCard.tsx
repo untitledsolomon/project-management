@@ -13,9 +13,10 @@ import { cn } from "@/lib/utils";
 interface TaskCardProps {
   task: Task;
   isOverlay?: boolean;
+  onClick?: () => void;
 }
 
-export function TaskCard({ task, isOverlay }: TaskCardProps) {
+export function TaskCard({ task, isOverlay, onClick }: TaskCardProps) {
   const {
     attributes,
     listeners,
@@ -52,6 +53,7 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
       style={style}
       {...attributes}
       {...listeners}
+      onClick={onClick}
       className={cn(
         "group mb-3 cursor-grab active:cursor-grabbing outline-none",
         isOverlay ? "rotate-3 scale-105 z-50 shadow-xl" : ""

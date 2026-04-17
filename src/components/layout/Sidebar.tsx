@@ -20,8 +20,10 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
+import { NewProjectModal } from "../project/NewProjectModal";
 
 export function Sidebar() {
+  const [newProjectModalOpen, setNewProjectModalOpen] = useState(false);
   const pathname = usePathname();
   const { user, org, signOut } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
@@ -62,12 +64,20 @@ export function Sidebar() {
       {/* New Project Button */}
       {!collapsed && (
         <div className="px-4 mb-6">
-          <Button className="w-full gap-2 justify-start">
+          <Button
+            className="w-full gap-2 justify-start"
+            onClick={() => setNewProjectModalOpen(true)}
+          >
             <Plus size={18} />
             New Project
           </Button>
         </div>
       )}
+
+      <NewProjectModal
+        open={newProjectModalOpen}
+        onOpenChange={setNewProjectModalOpen}
+      />
 
       {/* Navigation */}
       <nav className="flex-1 px-2 space-y-1 overflow-y-auto">
