@@ -1,0 +1,66 @@
+
+> axis@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.1.0
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.0.2:3000
+
+ ✓ Starting...
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+ ✓ Ready in 2.1s
+ ○ Compiling /auth/login ...
+ ✓ Compiled /auth/login in 9.2s (881 modules)
+ ⨯ Error: Only plain objects, and a few built-ins, can be passed to Client Components from Server Components. Classes or null prototypes are not supported.
+  <... client={{}} children={{...}}>
+              ^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '1615100630'
+}
+Supabase credentials missing. Data persistence will be disabled.
+ GET /auth/login 500 in 11602ms
+ ○ Compiling /projects ...
+ ✓ Compiled /projects in 1231ms (948 modules)
+ GET /projects 200 in 1248ms
+ ⨯ Error: Only plain objects, and a few built-ins, can be passed to Client Components from Server Components. Classes or null prototypes are not supported.
+  <... client={{}} children={{...}}>
+              ^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '1615100630'
+}
+Supabase credentials missing. Data persistence will be disabled.
+ ⨯ Error: Only plain objects, and a few built-ins, can be passed to Client Components from Server Components. Classes or null prototypes are not supported.
+  <... client={{}} children={{...}}>
+              ^^^^
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '1615100630'
+}
+ ✓ Compiled in 521ms (904 modules)
+Supabase credentials missing. Data persistence will be disabled.
+ GET /auth/login 200 in 179ms
+ GET /projects 200 in 78ms
+ ✓ Compiled in 789ms (867 modules)
+ ✓ Compiled in 1513ms (439 modules)
+ ✓ Compiled in 346ms (439 modules)
+ ✓ Compiled in 405ms (439 modules)
+ ✓ Compiled in 2.8s (884 modules)
+ ✓ Compiled in 270ms (443 modules)
+ ✓ Compiled in 200ms (443 modules)
+ ✓ Compiled in 218ms (443 modules)
+Supabase credentials missing. Data persistence will be disabled.
+ GET /auth/login 200 in 390ms
+ ✓ Compiled /projects in 324ms (469 modules)
+Supabase credentials missing. Data persistence will be disabled.
+ GET /projects 200 in 658ms
+ ✓ Compiled in 379ms (443 modules)
+ ✓ Compiled in 347ms (443 modules)

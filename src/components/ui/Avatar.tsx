@@ -4,52 +4,39 @@ import { cn } from "@/lib/utils";
 interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   src?: string;
   fallback: string;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
 }
 
-const Avatar = ({
-  src,
-  fallback,
-  size = "md",
-  className,
-  ...props
-}: AvatarProps) => {
+export function Avatar({ src, fallback, size = "md", className, ...props }: AvatarProps) {
   const sizes = {
-    sm: "h-6 w-6 text-[10px]",
-    md: "h-8 w-8 text-xs",
-    lg: "h-10 w-10 text-sm",
+    xs: "h-6 w-6 text-[10px]",
+    sm: "h-8 w-8 text-xs",
+    md: "h-10 w-10 text-sm",
+    lg: "h-12 w-12 text-base",
   };
 
   return (
     <div
       className={cn(
-        "relative flex shrink-0 overflow-hidden rounded-full bg-surface-3 font-medium text-secondary items-center justify-center border border-white",
+        "relative flex shrink-0 overflow-hidden rounded-full bg-surface-2 border border-border items-center justify-center font-medium text-secondary uppercase",
         sizes[size],
         className
       )}
       {...props}
     >
       {src ? (
-        <img src={src} alt={fallback} className="aspect-square h-full w-full" />
+        <img src={src} alt={fallback} className="h-full w-full object-cover" />
       ) : (
-        <span>{fallback}</span>
+        fallback.substring(0, 2)
       )}
     </div>
   );
-};
+}
 
-const AvatarGroup = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => {
+export function AvatarGroup({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("flex -space-x-2", className)}>
+    <div className={cn("flex -space-x-2 overflow-hidden", className)}>
       {children}
     </div>
   );
-};
-
-export { Avatar, AvatarGroup };
+}

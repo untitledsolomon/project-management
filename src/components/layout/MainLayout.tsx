@@ -1,25 +1,31 @@
 "use client";
 
-import * as React from "react";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
+import { PageHeader } from "../ui/PageHeader";
 
-export function MainLayout({
-  children,
-  title
-}: {
+interface MainLayoutProps {
   children: React.ReactNode;
   title?: string;
-}) {
+  description?: string;
+  action?: React.ReactNode;
+}
+
+export function MainLayout({ children, title, description, action }: MainLayoutProps) {
   return (
-    <div className="flex min-h-screen bg-surface-2 group">
+    <div className="flex h-screen bg-surface-1 overflow-hidden">
       <Sidebar />
-      <div className="flex-1 flex flex-col transition-all duration-300 lg:ml-[256px] group-has-[aside.w-\[64px\]]:lg:ml-[64px]">
-        <Topbar title={title} />
-        <main className="flex-1 p-8 overflow-auto">
-          <div className="max-w-7xl mx-auto">
-            {children}
-          </div>
+      <div className="flex-1 flex flex-col min-w-0">
+        <Topbar />
+        <main className="flex-1 overflow-y-auto p-8">
+          {title && (
+            <PageHeader
+              title={title}
+              description={description}
+              action={action}
+            />
+          )}
+          {children}
         </main>
       </div>
     </div>
