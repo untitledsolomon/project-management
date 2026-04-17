@@ -16,8 +16,14 @@ export default function ProjectPage() {
   const { projects } = useWorkspace();
   const [activeView, setActiveView] = React.useState<"Board" | "List" | "Timeline" | "Calendar">("Board");
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+  const [selectedTaskId, setSelectedTaskId] = React.useState<string | null>(null);
 
   const project = projects.find(p => p.id === params.id);
+
+  const handleTaskClick = (taskId: string) => {
+    setSelectedTaskId(taskId);
+    setIsDrawerOpen(true);
+  };
 
   if (!project) {
     return (
@@ -43,9 +49,9 @@ export default function ProjectPage() {
       <ViewSwitcher activeView={activeView} onViewChange={setActiveView} />
 
       <div className="mt-4">
-        {activeView === "Board" && <KanbanBoard onTaskClick={() => setIsDrawerOpen(true)} />}
-        {activeView === "List" && <ListView onTaskClick={() => setIsDrawerOpen(true)} />}
-        {activeView === "Timeline" && <TimelineView onTaskClick={() => setIsDrawerOpen(true)} />}
+        {activeView === "Board" && <KanbanBoard onTaskClick={handleTaskClick} />}
+        {activeView === "List" && <ListView onTaskClick={handleTaskClick} />}
+        {activeView === "Timeline" && <TimelineView onTaskClick={handleTaskClick} />}
         {activeView === "Calendar" && (
           <div className="h-96 flex items-center justify-center bg-white border border-dashed border-border-base rounded-card text-muted">
             Calendar view coming soon
@@ -56,6 +62,7 @@ export default function ProjectPage() {
       <TaskDetailDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
+        taskId={selectedTaskId}
       />
     </MainLayout>
   );

@@ -189,7 +189,7 @@ This is the heart of Regent PM — multiple views over the same underlying data.
 The default view for most projects. Tasks as cards, columns as statuses or custom groupings.
 
 **Features:**
-- [ ] Drag-and-drop cards between columns
+- [x] Drag-and-drop cards between columns
 - [ ] Drag-and-drop to reorder within a column
 - [ ] Configurable columns (add, rename, reorder, delete, set colour)
 - [ ] WIP limits per column (optional — turns column red when exceeded)
@@ -199,16 +199,16 @@ The default view for most projects. Tasks as cards, columns as statuses or custo
 - [ ] Card cover images (from attachments)
 - [ ] Group by: Assignee / Priority / Label / Custom Field
 - [ ] Filter by: Assignee / Due date / Priority / Label / Custom field value
-- [ ] Search within board
+- [x] Search within board
 - [ ] Swimlanes (group rows by assignee, team, or epic)
-- [ ] Sub-task progress indicator on card
+- [x] Sub-task progress indicator on card
 - [ ] Blocked task indicator (dependency not resolved)
 
 ### 6.2 Timeline (Gantt)
 For project managers and stakeholders who need to see work over time and manage dependencies.
 
 **Features:**
-- [ ] Tasks displayed as horizontal bars on a date axis
+- [x] Tasks displayed as horizontal bars on a date axis
 - [ ] Drag to move task dates
 - [ ] Drag to extend/shorten task duration
 - [ ] Dependency lines (arrows) between tasks (Finish-to-Start, Start-to-Start, etc.)
@@ -216,7 +216,7 @@ For project managers and stakeholders who need to see work over time and manage 
 - [ ] Milestones as diamond markers on the timeline
 - [ ] Group rows by: Section / Assignee / Priority / Label
 - [ ] Zoom levels: Day / Week / Month / Quarter / Year
-- [ ] Today indicator line
+- [x] Today indicator line
 - [ ] Baseline comparison (compare current schedule to original plan)
 - [ ] Critical path highlighting (tasks that directly affect project end date)
 - [ ] Colour coding by assignee or status
@@ -229,14 +229,14 @@ For project managers and stakeholders who need to see work over time and manage 
 A flat, scannable, sortable task list — preferred by users who want spreadsheet-like density.
 
 **Features:**
-- [ ] All tasks in a single scrollable list
+- [x] All tasks in a single scrollable list
 - [ ] Inline editing of any field (title, date, assignee, priority, status, custom fields)
 - [ ] Multi-select tasks for bulk actions
 - [ ] Sort by: Name / Due Date / Priority / Assignee / Created / Custom field
 - [ ] Group by: Section / Status / Assignee / Priority / Label / Due date / Custom field
 - [ ] Filter panel (combine multiple filters with AND/OR logic)
 - [ ] Show/hide columns (custom fields as columns)
-- [ ] Row density options (comfortable / compact)
+- [x] Row density options (comfortable / compact)
 - [ ] Subtask expansion inline
 - [ ] Progress bar per section group
 - [ ] Keyboard-friendly navigation and editing
@@ -330,19 +330,19 @@ Each user's personal dashboard — the first thing they see on login.
 
 ### 7.1 Task Management (Core)
 
-- [ ] Create task with title, description (rich text with formatting, checklists, embeds)
+- [x] Create task with title, description (rich text with formatting, checklists, embeds)
 - [ ] Assign to one or multiple members
 - [ ] Set due date and start date
 - [ ] Set priority (Urgent / High / Medium / Low / None)
 - [ ] Set status (per-project configurable statuses)
 - [ ] Add labels / tags
 - [ ] Add custom field values
-- [ ] Create subtasks (unlimited nesting depth, Phase 2)
+- [x] Create subtasks (unlimited nesting depth, Phase 2)
 - [ ] Set task dependencies (blocks / is blocked by / relates to)
 - [ ] Attach files (upload or link from Google Drive, Dropbox, etc.)
 - [ ] Link related tasks
 - [ ] Set estimated time
-- [ ] Log time (manual entry or timer)
+- [x] Log time (manual entry or timer)
 - [ ] Recurring tasks (daily, weekly, monthly, custom)
 - [ ] Duplicate task
 - [ ] Move task to another project or section
@@ -350,7 +350,7 @@ Each user's personal dashboard — the first thing they see on login.
 - [ ] Convert task to project
 - [ ] Task templates (save a configured task as reusable template)
 - [ ] Archive and delete tasks
-- [ ] Full activity log on each task (who changed what, when)
+- [x] Full activity log on each task (who changed what, when)
 - [ ] @mention team members in description or comments
 - [ ] Emoji reactions on comments
 - [ ] Resolve and reopen comments

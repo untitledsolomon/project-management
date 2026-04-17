@@ -4,6 +4,21 @@ import * as React from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
+export interface Subtask {
+  id: string;
+  title: string;
+  done: boolean;
+}
+
+export interface Comment {
+  id: string;
+  user: string;
+  avatar?: string;
+  text: string;
+  time: string;
+  isSystem?: boolean;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -19,6 +34,8 @@ export interface Task {
   start?: number;
   duration?: number;
   dependencies?: string[];
+  subtasksList?: Subtask[];
+  commentsList?: Comment[];
 }
 
 export interface Project {
@@ -49,6 +66,7 @@ interface WorkspaceContextType {
   addProject: (project: Omit<Project, "id">) => void;
   addLead: (lead: Omit<Lead, "id">) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
+  deleteTask: (id: string) => void;
   convertLead: (leadId: string) => void;
   isLoading: boolean;
 }
@@ -57,10 +75,70 @@ const WorkspaceContext = React.createContext<WorkspaceContextType | undefined>(u
 
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [tasks, setTasks] = React.useState<Task[]>([
-    { id: "AX-101", title: "User interview synthesis", status: "todo", priority: "P2", assignee: { name: "Solomon", fallback: "SK" }, dueDate: "Jan 25", project: "Axis Platform", comments: 4, attachments: 2, subtasks: { completed: 0, total: 5 } },
-    { id: "AX-102", title: "Finalize brand guidelines", status: "in-progress", priority: "P1", assignee: { name: "Solomon", fallback: "SK" }, dueDate: "Today", project: "Axis Platform", comments: 0, attachments: 5, subtasks: { completed: 2, total: 3 } },
-    { id: "AX-104", title: "Define design tokens", status: "todo", priority: "P1", assignee: { name: "Emma", fallback: "EM" }, dueDate: "Today", project: "Axis Platform", comments: 12, attachments: 1, subtasks: { completed: 3, total: 8 } },
-    { id: "AX-98", title: "QA Mobile responsiveness", status: "review", priority: "P3", assignee: { name: "Jack", fallback: "JD" }, dueDate: "Jan 22", project: "Axis Platform", comments: 8, attachments: 0, subtasks: { completed: 5, total: 5 } },
+    {
+      id: "AX-101",
+      title: "User interview synthesis",
+      status: "todo",
+      priority: "P2",
+      assignee: { name: "Solomon", fallback: "SK" },
+      dueDate: "Jan 25",
+      project: "Axis Platform",
+      comments: 0,
+      attachments: 2,
+      subtasks: { completed: 0, total: 0 },
+      description: "Synthesis of user interviews from the last week.",
+      subtasksList: [],
+      commentsList: []
+    },
+    {
+      id: "AX-102",
+      title: "Finalize brand guidelines",
+      status: "in-progress",
+      priority: "P1",
+      assignee: { name: "Solomon", fallback: "SK" },
+      dueDate: "Today",
+      project: "Axis Platform",
+      comments: 1,
+      attachments: 5,
+      subtasks: { completed: 2, total: 3 },
+      description: "Comprehensive refresh of the brand guidelines.",
+      subtasksList: [
+        { id: "st-1", title: "Define color palette", done: true },
+        { id: "st-2", title: "Select primary fonts", done: true },
+        { id: "st-3", title: "Layout grid system", done: false },
+      ],
+      commentsList: [
+        { id: "c-1", user: "Emma M.", text: "I've uploaded the latest font files to the attachments.", time: "2h ago", avatar: "EM" }
+      ]
+    },
+    {
+      id: "AX-104",
+      title: "Define design tokens",
+      status: "todo",
+      priority: "P1",
+      assignee: { name: "Emma", fallback: "EM" },
+      dueDate: "Today",
+      project: "Axis Platform",
+      comments: 0,
+      attachments: 1,
+      subtasks: { completed: 3, total: 8 },
+      subtasksList: [],
+      commentsList: []
+    },
+    {
+      id: "AX-98",
+      title: "QA Mobile responsiveness",
+      status: "review",
+      priority: "P3",
+      assignee: { name: "Jack", fallback: "JD" },
+      dueDate: "Jan 22",
+      project: "Axis Platform",
+      comments: 0,
+      attachments: 0,
+      subtasks: { completed: 5, total: 5 },
+      subtasksList: [],
+      commentsList: []
+    },
   ]);
 
   const [projects, setProjects] = React.useState<Project[]>([
@@ -155,10 +233,36 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateTask = async (id: string, updates: Partial<Task>) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, ...updates } : t));
+    setTasks(tasks => tasks.map(t => {
+      if (t.id === id) {
+        const updatedTask = { ...t, ...updates };
+        // Recalculate subtask counts if subtasksList was updated
+        if (updates.subtasksList) {
+          updatedTask.subtasks = {
+            completed: updates.subtasksList.filter(st => st.done).length,
+            total: updates.subtasksList.length
+          };
+        }
+        // Recalculate comments count if commentsList was updated
+        if (updates.commentsList) {
+          updatedTask.comments = updates.commentsList.length;
+        }
+        return updatedTask;
+      }
+      return t;
+    }));
 
     if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
       await supabase.from('tasks').update(updates).eq('id', id);
+    }
+  };
+
+  const deleteTask = async (id: string) => {
+    setTasks(tasks => tasks.filter(t => t.id !== id));
+    toast.success("Task " + id + " deleted");
+
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      await supabase.from('tasks').delete().eq('id', id);
     }
   };
 
@@ -191,7 +295,8 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
       addLead,
       updateTask,
       convertLead,
-      isLoading
+      isLoading,
+      deleteTask,
     }}>
       {children}
     </WorkspaceContext.Provider>

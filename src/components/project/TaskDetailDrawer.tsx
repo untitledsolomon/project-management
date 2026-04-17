@@ -2,26 +2,32 @@
 
 import * as React from "react";
 import { X, Play, Pause, MoreHorizontal, Paperclip, ChevronDown, CheckSquare, MessageSquare } from "lucide-react";
+import { useWorkspace, Subtask, Comment } from "@/components/providers/WorkspaceProvider";
 import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn, generateId } from "@/lib/utils";
 import { LiveTaskPresence } from "@/components/PresenceIndicator";
 import { RichTextEditor } from "./RichTextEditor";
+import { toast } from "sonner";
 
 export function TaskDetailDrawer({
   isOpen,
   onClose,
-  taskId = "AX-102"
+  taskId
 }: {
   isOpen: boolean;
   onClose: () => void;
-  taskId?: string;
+  taskId: string | null;
 }) {
+  const { tasks, updateTask, deleteTask } = useWorkspace();
+  const task = tasks.find(t => t.id === taskId);
+
   const [isTimerRunning, setIsTimerRunning] = React.useState(false);
   const [time, setTime] = React.useState(15735); // 04:22:15 in seconds
+  const [newComment, setNewComment] = React.useState("");
 
   React.useEffect(() => {
     let interval: ReturnType<typeof setInterval> | undefined;
@@ -44,9 +50,71 @@ export function TaskDetailDrawer({
     return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
+  if (!task && isOpen) return null;
+
+  const handleToggleSubtask = (subId: string) => {
+    if (!task) return;
+    const newList = task.subtasksList?.map(st =>
+      st.id === subId ? { ...st, done: !st.done } : st
+    );
+    updateTask(task.id, { subtasksList: newList });
+  };
+
+  const handleAddSubtask = () => {
+    if (!task) return;
+    const title = prompt("New subtask title:");
+    if (!title) return;
+    const newSub: Subtask = {
+      id: generateId("st-"),
+      title,
+      done: false
+    };
+    updateTask(task.id, {
+      subtasksList: [...(task.subtasksList || []), newSub]
+    });
+  };
+
+  const handleAddComment = () => {
+    if (!task || !newComment.trim()) return;
+    const comment: Comment = {
+      id: generateId("c-"),
+      user: "Solomon",
+      avatar: "SK",
+      text: newComment,
+      time: "Just now"
+    };
+    updateTask(task.id, {
+      commentsList: [...(task.commentsList || []), comment]
+    });
+    setNewComment("");
+    toast.success("Comment added");
+  };
+
+  const handleDelete = () => {
+    if (!task) return;
+    if (confirm("Are you sure you want to delete this task?")) {
+      deleteTask(task.id);
+      onClose();
+    }
+  };
+
+  const statusColors: Record<string, string> = {
+    "todo": "bg-status-todo-bg text-status-todo-text",
+    "in-progress": "bg-status-progress-bg text-status-progress-text",
+    "review": "bg-status-review-bg text-status-review-text",
+    "done": "bg-status-done-bg text-status-done-text",
+  };
+
+  const priorityColors: Record<string, string> = {
+    "P1": "#BE123C",
+    "P2": "#EA580C",
+    "P3": "#CA8A04",
+    "P4": "#9090A0",
+  };
+
   return (
     <AnimatePresence>
-      {isOpen && (
+      {isOpen && task && (
         <>
           <motion.div
             initial={{ opacity: 0 }}
@@ -65,10 +133,17 @@ export function TaskDetailDrawer({
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-border-base">
               <div className="flex items-center gap-4">
-                <span className="font-mono text-xs text-muted uppercase tracking-widest">{taskId}</span>
-                <LiveTaskPresence taskId={taskId} />
+                <span className="font-mono text-xs text-muted uppercase tracking-widest">{task.id}</span>
+                <LiveTaskPresence taskId={task.id} />
               </div>
               <div className="flex items-center gap-2">
+                <button
+                  onClick={handleDelete}
+                  className="p-1.5 text-muted hover:text-p1 hover:bg-p1/5 rounded-badge transition-colors"
+                  title="Delete task"
+                >
+                  <X size={18} />
+                </button>
                 <button className="p-1.5 text-muted hover:text-primary hover:bg-surface-2 rounded-badge transition-colors">
                   <MoreHorizontal size={18} />
                 </button>
@@ -85,21 +160,24 @@ export function TaskDetailDrawer({
                   className="text-2xl font-display text-primary mb-2 focus:outline-none focus:underline decoration-accent/30 underline-offset-4"
                   contentEditable
                   suppressContentEditableWarning={true}
+                  onBlur={(e) => updateTask(task.id, { title: e.currentTarget.innerText })}
                 >
-                  Finalize brand guidelines
+                  {task.title}
                 </h2>
                 <div className="flex flex-wrap gap-2 mt-4">
-                  <Badge className="bg-status-progress-bg text-status-progress-text">In Progress</Badge>
-                  <Badge variant="outline">Axis Rebrand</Badge>
-                  <Badge variant="priority" color="#BE123C">P1 Priority</Badge>
+                  <Badge className={statusColors[task.status] || "bg-status-todo-bg text-status-todo-text"}>
+                    {task.status.charAt(0).toUpperCase() + task.status.slice(1).replace("-", " ")}
+                  </Badge>
+                  <Badge variant="outline">{task.project}</Badge>
+                  <Badge variant="priority" color={priorityColors[task.priority]}>{task.priority} Priority</Badge>
                 </div>
               </div>
 
               {/* Properties Section */}
               <div className="px-6 py-4 space-y-3">
                 {[
-                  { label: "Assignee", value: <div className="flex items-center gap-2"><Avatar fallback="SK" size="sm" /> Solomon</div> },
-                  { label: "Due Date", value: "Today (Jan 23)" },
+                  { label: "Assignee", value: <div className="flex items-center gap-2"><Avatar fallback={task.assignee.fallback} size="sm" /> {task.assignee.name}</div> },
+                  { label: "Due Date", value: task.dueDate },
                   { label: "Labels", value: <div className="flex gap-1"><Badge variant="outline">Design</Badge><Badge variant="outline">Brand</Badge></div> },
                 ].map((prop) => (
                   <div key={prop.label} className="grid grid-cols-3 items-center text-sm">
@@ -117,8 +195,8 @@ export function TaskDetailDrawer({
               <div className="px-6 py-4">
                 <h3 className="text-xs font-mono uppercase tracking-widest text-muted mb-4">Description</h3>
                 <RichTextEditor
-                  content="<p>Comprehensive refresh of the brand guidelines including:</p><ul><li>Updated typography scale using Instrument Serif</li><li>Refined color palette with indigo accents</li><li>Component-based layout system for web/mobile</li></ul>"
-                  onChange={(val) => console.log(val)}
+                  content={task.description || "<p>Click to add description...</p>"}
+                  onChange={(val) => updateTask(task.id, { description: val })}
                 />
               </div>
 
@@ -126,16 +204,16 @@ export function TaskDetailDrawer({
               <div className="px-6 py-4">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xs font-mono uppercase tracking-widest text-muted">Subtasks</h3>
-                  <span className="text-[10px] font-mono text-muted">2/3</span>
+                  <span className="text-[10px] font-mono text-muted">{task.subtasks.completed}/{task.subtasks.total}</span>
                 </div>
-                <ProgressBar value={66} className="mb-4" />
+                <ProgressBar value={task.subtasks.total > 0 ? (task.subtasks.completed / task.subtasks.total) * 100 : 0} className="mb-4" />
                 <div className="space-y-2">
-                  {[
-                    { title: "Define color palette", done: true },
-                    { title: "Select primary fonts", done: true },
-                    { title: "Layout grid system", done: false },
-                  ].map((sub, i) => (
-                    <div key={i} className="flex items-center gap-3 py-1 group">
+                  {task.subtasksList?.map((sub) => (
+                    <div
+                      key={sub.id}
+                      className="flex items-center gap-3 py-1 group cursor-pointer"
+                      onClick={() => handleToggleSubtask(sub.id)}
+                    >
                       <div className={cn(
                         "h-4 w-4 rounded border flex items-center justify-center transition-colors",
                         sub.done ? "bg-accent border-accent text-white" : "border-border-base group-hover:border-accent"
@@ -145,6 +223,12 @@ export function TaskDetailDrawer({
                       <span className={cn("text-sm", sub.done ? "text-muted line-through" : "text-primary")}>{sub.title}</span>
                     </div>
                   ))}
+                  <button
+                    onClick={handleAddSubtask}
+                    className="text-xs text-accent font-medium hover:underline mt-2"
+                  >
+                    + Add subtask
+                  </button>
                 </div>
               </div>
 
@@ -222,20 +306,19 @@ export function TaskDetailDrawer({
                   <div className="flex-1">
                     <textarea
                       placeholder="Add a comment..."
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
                       className="w-full bg-white border border-border-base rounded-card p-3 text-sm outline-none focus:border-accent transition-all resize-none h-20"
                     />
                     <div className="flex justify-end mt-2">
-                      <Button size="sm">Comment</Button>
+                      <Button size="sm" onClick={handleAddComment}>Comment</Button>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-6">
-                  {[
-                    { user: "Emma M.", text: "I've uploaded the latest font files to the attachments.", time: "2h ago", avatar: "EM" },
-                    { user: "System", text: "changed status to In Progress", time: "4h ago", isSystem: true },
-                  ].map((activity, i) => (
-                    <div key={i} className="flex gap-3">
+                  {task.commentsList?.map((activity) => (
+                    <div key={activity.id} className="flex gap-3">
                       {!activity.isSystem ? (
                         <>
                           <Avatar fallback={activity.avatar || "?"} size="sm" />
