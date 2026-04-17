@@ -90,23 +90,58 @@ ALTER TABLE activity_log ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 
 -- Base Policies (org_id based)
+
+-- Organisations
 CREATE POLICY "Users can view their own organisation" ON organisations
     FOR SELECT USING (id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Anyone authenticated can create an organisation" ON organisations
+    FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "Owners can update their organisation" ON organisations
+    FOR UPDATE USING (id IN (SELECT org_id FROM users WHERE id = auth.uid() AND role = 'owner'))
+    WITH CHECK (id IN (SELECT org_id FROM users WHERE id = auth.uid() AND role = 'owner'));
 
+-- Users
 CREATE POLICY "Users can view members of their organisation" ON users
     FOR SELECT USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can update their own profile" ON users
+    FOR UPDATE USING (id = auth.uid())
+    WITH CHECK (id = auth.uid());
+-- Note: users are usually created via auth trigger or service role, but for this app we'll allow update for org setup
+CREATE POLICY "Users can set their own org during setup" ON users
+    FOR UPDATE USING (id = auth.uid())
+    WITH CHECK (id = auth.uid());
 
+-- Teams
 CREATE POLICY "Users can view teams in their organisation" ON teams
     FOR SELECT USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can insert teams in their organisation" ON teams
+    FOR INSERT WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can update teams in their organisation" ON teams
+    FOR UPDATE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()))
+    WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can delete teams in their organisation" ON teams
+    FOR DELETE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
 
+-- Team Members
 CREATE POLICY "Users can view team members in their organisation" ON team_members
     FOR SELECT USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can insert team members in their organisation" ON team_members
+    FOR INSERT WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can delete team members in their organisation" ON team_members
+    FOR DELETE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
 
+-- Activity Log
 CREATE POLICY "Users can view activity logs in their organisation" ON activity_log
     FOR SELECT USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can insert activity logs in their organisation" ON activity_log
+    FOR INSERT WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
 
+-- Notifications
 CREATE POLICY "Users can view their own notifications" ON notifications
     FOR SELECT USING (user_id = auth.uid());
+CREATE POLICY "Users can update their own notifications" ON notifications
+    FOR UPDATE USING (user_id = auth.uid())
+    WITH CHECK (user_id = auth.uid());
 
 -- Indexes
 CREATE INDEX idx_users_org_id ON users(org_id);

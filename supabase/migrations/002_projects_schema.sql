@@ -193,38 +193,127 @@ ALTER TABLE time_entries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE milestones ENABLE ROW LEVEL SECURITY;
 
 -- Policies (org_id based)
+
+-- Projects
 CREATE POLICY "Users can view projects in their organisation" ON projects
     FOR SELECT USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can insert projects in their organisation" ON projects
+    FOR INSERT WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can update projects in their organisation" ON projects
+    FOR UPDATE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()))
+    WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can delete projects in their organisation" ON projects
+    FOR DELETE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
 
+-- Project Members
 CREATE POLICY "Users can view project members in their organisation" ON project_members
     FOR SELECT USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can insert project members in their organisation" ON project_members
+    FOR INSERT WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can update project members in their organisation" ON project_members
+    FOR UPDATE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()))
+    WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can delete project members in their organisation" ON project_members
+    FOR DELETE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
 
+-- Sections
 CREATE POLICY "Users can view sections in their organisation" ON sections
     FOR SELECT USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can insert sections in their organisation" ON sections
+    FOR INSERT WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can update sections in their organisation" ON sections
+    FOR UPDATE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()))
+    WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can delete sections in their organisation" ON sections
+    FOR DELETE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
 
+-- Tasks
 CREATE POLICY "Users can view tasks in their organisation" ON tasks
     FOR SELECT USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can insert tasks in their organisation" ON tasks
+    FOR INSERT WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can update tasks in their organisation" ON tasks
+    FOR UPDATE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()))
+    WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can delete tasks in their organisation" ON tasks
+    FOR DELETE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
 
+-- Task Labels
 CREATE POLICY "Users can view task labels in their organisation" ON task_labels
     FOR SELECT USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can insert task labels in their organisation" ON task_labels
+    FOR INSERT WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can update task labels in their organisation" ON task_labels
+    FOR UPDATE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()))
+    WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can delete task labels in their organisation" ON task_labels
+    FOR DELETE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
 
+-- Task Label Assignments
 CREATE POLICY "Users can view task label assignments in their organisation" ON task_label_assignments
     FOR SELECT USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can insert task label assignments in their organisation" ON task_label_assignments
+    FOR INSERT WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can update task label assignments in their organisation" ON task_label_assignments
+    FOR UPDATE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()))
+    WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can delete task label assignments in their organisation" ON task_label_assignments
+    FOR DELETE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
 
+-- Task Dependencies
 CREATE POLICY "Users can view task dependencies in their organisation" ON task_dependencies
     FOR SELECT USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can insert task dependencies in their organisation" ON task_dependencies
+    FOR INSERT WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can update task dependencies in their organisation" ON task_dependencies
+    FOR UPDATE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()))
+    WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can delete task dependencies in their organisation" ON task_dependencies
+    FOR DELETE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
 
+-- Task Comments
 CREATE POLICY "Users can view task comments in their organisation" ON task_comments
     FOR SELECT USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can insert task comments in their organisation" ON task_comments
+    FOR INSERT WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can update task comments in their organisation" ON task_comments
+    FOR UPDATE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()))
+    WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can delete task comments in their organisation" ON task_comments
+    FOR DELETE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
 
+-- Task Attachments
 CREATE POLICY "Users can view task attachments in their organisation" ON task_attachments
     FOR SELECT USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can insert task attachments in their organisation" ON task_attachments
+    FOR INSERT WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can update task attachments in their organisation" ON task_attachments
+    FOR UPDATE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()))
+    WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can delete task attachments in their organisation" ON task_attachments
+    FOR DELETE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
 
+-- Time Entries
 CREATE POLICY "Users can view time entries in their organisation" ON time_entries
     FOR SELECT USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can insert time entries in their organisation" ON time_entries
+    FOR INSERT WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can update time entries in their organisation" ON time_entries
+    FOR UPDATE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()))
+    WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can delete time entries in their organisation" ON time_entries
+    FOR DELETE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
 
+-- Milestones
 CREATE POLICY "Users can view milestones in their organisation" ON milestones
     FOR SELECT USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can insert milestones in their organisation" ON milestones
+    FOR INSERT WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can update milestones in their organisation" ON milestones
+    FOR UPDATE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()))
+    WITH CHECK (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
+CREATE POLICY "Users can delete milestones in their organisation" ON milestones
+    FOR DELETE USING (org_id IN (SELECT org_id FROM users WHERE id = auth.uid()));
 
 -- Indexes
 CREATE INDEX idx_projects_org_id ON projects(org_id);

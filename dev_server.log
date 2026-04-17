@@ -64,3 +64,5 @@ Supabase credentials missing. Data persistence will be disabled.
  GET /projects 200 in 658ms
  ✓ Compiled in 379ms (443 modules)
  ✓ Compiled in 347ms (443 modules)
+ ✓ Compiled in 5.4s (443 modules)
+ ✓ Compiled in 614ms (443 modules)
