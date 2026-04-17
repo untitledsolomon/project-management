@@ -24,7 +24,7 @@ import {
 interface KanbanColumnProps {
   column: { id: string; title: string; statusColor: string };
   tasks: Task[];
-  onTaskClick?: () => void;
+  onTaskClick?: (taskId: string) => void;
 }
 
 function KanbanColumn({ column, tasks, onTaskClick }: KanbanColumnProps) {
@@ -65,7 +65,7 @@ function KanbanColumn({ column, tasks, onTaskClick }: KanbanColumnProps) {
       <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar min-h-[150px]">
         <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
           {tasks.map((task) => (
-            <TaskCard key={task.id} task={task} onClick={onTaskClick} />
+            <TaskCard key={task.id} task={task} onClick={() => onTaskClick?.(task.id)} />
           ))}
         </SortableContext>
 
@@ -102,8 +102,14 @@ function KanbanColumn({ column, tasks, onTaskClick }: KanbanColumnProps) {
   );
 }
 
-export function KanbanBoard({ onTaskClick }: { onTaskClick?: () => void }) {
+export function KanbanBoard({ onTaskClick }: { onTaskClick?: (taskId: string) => void }) {
   const { tasks, updateTask } = useWorkspace();
+  const [searchTerm, setSearchTerm] = React.useState("");
+
+  const filteredTasks = tasks.filter(t =>
+    t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    t.id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const columns = [
     { id: "todo", title: "Todo", statusColor: "bg-status-todo-bg text-status-todo-text" },
@@ -140,21 +146,35 @@ export function KanbanBoard({ onTaskClick }: { onTaskClick?: () => void }) {
   }
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCorners}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="flex gap-6 overflow-x-auto pb-4 h-[calc(100vh-250px)]">
-        {columns.map((column) => (
-          <KanbanColumn
-            key={column.id}
-            column={column}
-            tasks={tasks.filter(t => t.status === column.id)}
-            onTaskClick={onTaskClick}
+    <div className="space-y-4">
+      <div className="flex items-center gap-4 px-1">
+        <div className="relative flex-1 max-w-sm">
+          <Plus className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted h-3.5 w-3.5 rotate-45" />
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-8 pr-3 py-1.5 bg-white border border-border-base rounded-badge text-xs outline-none focus:ring-1 focus:ring-accent"
           />
-        ))}
+        </div>
       </div>
-    </DndContext>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="flex gap-6 overflow-x-auto pb-4 h-[calc(100vh-320px)]">
+          {columns.map((column) => (
+            <KanbanColumn
+              key={column.id}
+              column={column}
+              tasks={filteredTasks.filter(t => t.status === column.id)}
+              onTaskClick={onTaskClick}
+            />
+          ))}
+        </div>
+      </DndContext>
+    </div>
   );
 }

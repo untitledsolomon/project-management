@@ -3,13 +3,19 @@
 import * as React from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Avatar } from "@/components/ui/Avatar";
-import { ArrowUpDown, MoreHorizontal, Layout, Maximize2, Minimize2 } from "lucide-react";
+import { ArrowUpDown, X, Layout, Maximize2, Minimize2, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/components/providers/WorkspaceProvider";
 
-export function ListView({ onTaskClick }: { onTaskClick?: () => void }) {
-  const { tasks } = useWorkspace();
+export function ListView({ onTaskClick }: { onTaskClick?: (taskId: string) => void }) {
+  const { tasks, updateTask, deleteTask } = useWorkspace();
   const [density, setDensity] = React.useState<"compact" | "comfortable" | "spacious">("comfortable");
+  const [searchTerm, setSearchTerm] = React.useState("");
+
+  const filteredTasks = tasks.filter(t =>
+    t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    t.id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const densityStyles = {
     compact: "py-1.5 px-4 text-[13px]",
@@ -38,7 +44,18 @@ export function ListView({ onTaskClick }: { onTaskClick?: () => void }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end gap-2 px-1">
+      <div className="flex items-center justify-between px-1">
+        <div className="relative flex-1 max-w-sm">
+          <Plus className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted h-3.5 w-3.5 rotate-45" />
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-8 pr-3 py-1.5 bg-white border border-border-base rounded-badge text-xs outline-none focus:ring-1 focus:ring-accent"
+          />
+        </div>
+        <div className="flex gap-2">
         {[
           { id: "compact", icon: Minimize2, label: "Compact" },
           { id: "comfortable", icon: Layout, label: "Comfortable" },
@@ -57,6 +74,7 @@ export function ListView({ onTaskClick }: { onTaskClick?: () => void }) {
             {density === d.id && <span>{d.label}</span>}
           </button>
         ))}
+      </div>
       </div>
       <div className="bg-white border border-border-base rounded-card overflow-hidden shadow-axis">
       <table className="w-full text-left border-collapse">
@@ -77,7 +95,7 @@ export function ListView({ onTaskClick }: { onTaskClick?: () => void }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-border-base">
-          {tasks.map((task) => {
+          {filteredTasks.map((task) => {
             const statusColors: Record<string, string> = {
               "todo": "bg-status-todo-bg text-status-todo-text",
               "in-progress": "bg-status-progress-bg text-status-progress-text",
@@ -96,7 +114,7 @@ export function ListView({ onTaskClick }: { onTaskClick?: () => void }) {
               <tr
                 key={task.id}
                 className={cn("group hover:bg-surface-2 transition-colors cursor-pointer", density === "compact" ? "text-[13px]" : density === "comfortable" ? "text-sm" : "text-base")}
-                onClick={onTaskClick}
+                onClick={() => onTaskClick?.(task.id)}
               >
                 <td className={cn(densityStyles[density], "w-10 pl-6")}><input type="checkbox" className="rounded" /></td>
                 <td className={cn(densityStyles[density], "font-medium text-primary")}>{task.title}</td>
@@ -115,9 +133,12 @@ export function ListView({ onTaskClick }: { onTaskClick?: () => void }) {
                 <td className={densityStyles[density]}>
                   <Badge variant="outline">{task.project}</Badge>
                 </td>
-                <td className={cn(densityStyles[density], "text-right pr-6")}>
-                  <button className="text-muted opacity-0 group-hover:opacity-100 transition-opacity">
-                    <MoreHorizontal size={16} />
+                <td className={cn(densityStyles[density], "text-right pr-6")} onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => { if(confirm("Delete task?")) deleteTask(task.id); }}
+                    className="text-muted opacity-0 group-hover:opacity-100 transition-opacity hover:text-p1"
+                  >
+                    <X size={16} />
                   </button>
                 </td>
               </tr>

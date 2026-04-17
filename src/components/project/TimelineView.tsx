@@ -14,7 +14,7 @@ interface TimelineTask extends Task {
   dependencies: string[];
 }
 
-export function TimelineView({ onTaskClick }: { onTaskClick?: () => void }) {
+export function TimelineView({ onTaskClick }: { onTaskClick?: (taskId: string) => void }) {
   const { tasks: workspaceTasks, updateTask } = useWorkspace();
 
   // Map workspace tasks to timeline format (adding dummy timeline data if missing)
@@ -89,7 +89,7 @@ export function TimelineView({ onTaskClick }: { onTaskClick?: () => void }) {
             {timelineTasks.map((task) => (
               <div
                 key={task.id}
-                onClick={onTaskClick}
+                onClick={() => onTaskClick?.(task.id)}
                 className="h-12 border-b border-border-base flex items-center px-4 text-[13px] font-medium text-primary hover:bg-surface-2 cursor-pointer group"
               >
                 <ChevronRight size={14} className="text-muted mr-1 opacity-50 group-hover:opacity-100 transition-opacity" />
