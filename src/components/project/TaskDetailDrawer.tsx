@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { X, Clock, Play, Pause, MoreHorizontal, Paperclip, ChevronDown, CheckSquare, MessageSquare } from "lucide-react";
+import { X, Play, Pause, MoreHorizontal, Paperclip, ChevronDown, CheckSquare, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -9,6 +9,7 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { LiveTaskPresence } from "@/components/PresenceIndicator";
+import { RichTextEditor } from "./RichTextEditor";
 
 export function TaskDetailDrawer({
   isOpen,
@@ -20,6 +21,28 @@ export function TaskDetailDrawer({
   taskId?: string;
 }) {
   const [isTimerRunning, setIsTimerRunning] = React.useState(false);
+  const [time, setTime] = React.useState(15735); // 04:22:15 in seconds
+
+  React.useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | undefined;
+    if (isTimerRunning) {
+      interval = setInterval(() => {
+        setTime((t) => t + 1);
+      }, 1000);
+    } else {
+      if (interval) clearInterval(interval);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isTimerRunning]);
+
+  const formatTime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
 
   return (
     <AnimatePresence>
@@ -49,7 +72,7 @@ export function TaskDetailDrawer({
                 <button className="p-1.5 text-muted hover:text-primary hover:bg-surface-2 rounded-badge transition-colors">
                   <MoreHorizontal size={18} />
                 </button>
-                <button onClick={onClose} className="p-1.5 text-muted hover:text-primary hover:bg-surface-2 rounded-badge transition-colors">
+                <button onClick={onClose} className="p-1.5 text-muted hover:text-primary hover:bg-surface-2 rounded-badge transition-colors" aria-label="Close drawer">
                   <X size={18} />
                 </button>
               </div>
@@ -58,7 +81,11 @@ export function TaskDetailDrawer({
             <div className="flex-1 overflow-y-auto custom-scrollbar">
               {/* Title Section */}
               <div className="px-6 py-6">
-                <h2 className="text-2xl font-display text-primary mb-2 focus:outline-none focus:underline decoration-accent/30 underline-offset-4" contentEditable>
+                <h2
+                  className="text-2xl font-display text-primary mb-2 focus:outline-none focus:underline decoration-accent/30 underline-offset-4"
+                  contentEditable
+                  suppressContentEditableWarning={true}
+                >
                   Finalize brand guidelines
                 </h2>
                 <div className="flex flex-wrap gap-2 mt-4">
@@ -89,15 +116,10 @@ export function TaskDetailDrawer({
               {/* Description Section */}
               <div className="px-6 py-4">
                 <h3 className="text-xs font-mono uppercase tracking-widest text-muted mb-4">Description</h3>
-                <div className="text-sm text-secondary leading-relaxed min-h-[100px] cursor-text">
-                  <p>Comprehensive refresh of the brand guidelines including:</p>
-                  <ul className="list-disc ml-4 mt-2 space-y-1">
-                    <li>Updated typography scale using Instrument Serif</li>
-                    <li>Refined color palette with indigo accents</li>
-                    <li>Component-based layout system for web/mobile</li>
-                  </ul>
-                  <p className="mt-4 text-muted/60">Click to add more details...</p>
-                </div>
+                <RichTextEditor
+                  content="<p>Comprehensive refresh of the brand guidelines including:</p><ul><li>Updated typography scale using Instrument Serif</li><li>Refined color palette with indigo accents</li><li>Component-based layout system for web/mobile</li></ul>"
+                  onChange={(val) => console.log(val)}
+                />
               </div>
 
               {/* Subtasks Section */}
@@ -126,14 +148,60 @@ export function TaskDetailDrawer({
                 </div>
               </div>
 
+              {/* Custom Fields Section */}
+              <div className="px-6 py-4">
+                <div className="flex items-center justify-between mb-4 group cursor-pointer">
+                  <h3 className="text-xs font-mono uppercase tracking-widest text-muted">Custom Fields</h3>
+                  <ChevronDown size={14} className="text-muted group-hover:text-primary transition-transform" />
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { label: "Technical Debt", value: "Low", type: "Select" },
+                    { label: "Reviewer", value: "Emma M.", type: "User" },
+                    { label: "Est. Hours", value: "12h", type: "Number" },
+                  ].map((field) => (
+                    <div key={field.label} className="grid grid-cols-3 items-center text-sm">
+                      <span className="text-muted">{field.label}</span>
+                      <div className="col-span-2 text-primary font-medium cursor-pointer hover:bg-surface-2 px-2 py-1 -ml-2 rounded transition-colors flex items-center justify-between">
+                        <span>{field.value}</span>
+                        <span className="text-[10px] font-mono text-muted opacity-0 group-hover:opacity-100 uppercase">{field.type}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Attachments Section */}
+              <div className="px-6 py-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xs font-mono uppercase tracking-widest text-muted">Attachments</h3>
+                  <button className="text-[10px] font-mono text-accent hover:underline">Add</button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { name: "Brand_Guide.pdf", size: "2.4MB" },
+                    { name: "Logo_Assets.zip", size: "12.8MB" },
+                  ].map((file) => (
+                    <div key={file.name} className="p-3 border border-border-base rounded-badge bg-surface-1 hover:bg-surface-2 transition-colors cursor-pointer group">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Paperclip size={14} className="text-muted" />
+                        <span className="text-xs font-medium truncate">{file.name}</span>
+                      </div>
+                      <span className="text-[10px] font-mono text-muted">{file.size}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* Time Tracker */}
               <div className="mx-6 my-6 p-4 bg-surface-2 rounded-card border border-border-base">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] font-mono text-muted uppercase">Time Tracked</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-mono font-bold">04:22:15</span>
+                    <span className="text-sm font-mono font-bold">{formatTime(time)}</span>
                     <button
                       onClick={() => setIsTimerRunning(!isTimerRunning)}
+                      aria-label={isTimerRunning ? "Pause" : "Start"}
                       className={cn(
                         "h-8 w-8 rounded-full flex items-center justify-center transition-all",
                         isTimerRunning ? "bg-p1 text-white" : "bg-accent text-white"
@@ -145,11 +213,56 @@ export function TaskDetailDrawer({
                 </div>
                 <ProgressBar value={80} height={2} className="opacity-50" />
               </div>
+
+              {/* Activity & Comments */}
+              <div className="px-6 py-4 border-t border-border-base bg-surface-1">
+                <h3 className="text-xs font-mono uppercase tracking-widest text-muted mb-4">Activity</h3>
+                <div className="flex gap-3 mb-6">
+                  <Avatar fallback="SK" size="sm" />
+                  <div className="flex-1">
+                    <textarea
+                      placeholder="Add a comment..."
+                      className="w-full bg-white border border-border-base rounded-card p-3 text-sm outline-none focus:border-accent transition-all resize-none h-20"
+                    />
+                    <div className="flex justify-end mt-2">
+                      <Button size="sm">Comment</Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  {[
+                    { user: "Emma M.", text: "I've uploaded the latest font files to the attachments.", time: "2h ago", avatar: "EM" },
+                    { user: "System", text: "changed status to In Progress", time: "4h ago", isSystem: true },
+                  ].map((activity, i) => (
+                    <div key={i} className="flex gap-3">
+                      {!activity.isSystem ? (
+                        <>
+                          <Avatar fallback={activity.avatar || "?"} size="sm" />
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-semibold">{activity.user}</span>
+                              <span className="text-[10px] font-mono text-muted">{activity.time}</span>
+                            </div>
+                            <p className="text-sm text-secondary">{activity.text}</p>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-2 pl-11">
+                          <span className="text-xs font-medium text-primary">{activity.user}</span>
+                          <span className="text-xs text-muted">{activity.text}</span>
+                          <span className="text-[10px] font-mono text-muted ml-2">{activity.time}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* AI Bottom Bar */}
             <div className="p-4 bg-white border-t border-border-base">
-              <Button className="w-full gap-2 bg-accent/5 text-accent border border-accent/20 hover:bg-accent/10">
+              <Button className="w-full gap-2 bg-accent text-white hover:bg-accent/90">
                 <MessageSquare size={16} />
                 <span>Ask Axis AI about this task</span>
               </Button>

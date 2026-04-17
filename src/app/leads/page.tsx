@@ -2,28 +2,21 @@
 
 import * as React from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { useWorkspace } from "@/components/providers/WorkspaceProvider";
 import {
-  Building2,
-  ArrowRight,
-  ExternalLink,
   FileText,
   Zap,
-  CheckCircle2,
-  MoreHorizontal
+  CheckCircle2
 } from "lucide-react";
 import { motion } from "framer-motion";
 
-const leads = [
-  { company: "Global Motors", type: "Manufacturing", value: "$45k", status: "Negotiation", confidence: 85, icon: "🏭" },
-  { company: "Horizon Tech", type: "SaaS", value: "$120k", status: "Qualified", confidence: 60, icon: "☁️" },
-  { company: "Lunar Optics", type: "R&D", value: "$28k", status: "Discovery", confidence: 45, icon: "🔭" },
-];
-
 export default function LeadsPage() {
+  const { leads, convertLead } = useWorkspace();
+
   return (
     <MainLayout title="Regent CAD / Leads Pipeline">
       <div className="mb-8">
@@ -63,7 +56,7 @@ export default function LeadsPage() {
       <div className="grid grid-cols-1 gap-4">
         {leads.map((lead, i) => (
           <motion.div
-            key={lead.company}
+            key={lead.id}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.1 }}
@@ -103,7 +96,13 @@ export default function LeadsPage() {
                     <Button variant="secondary" size="sm" className="gap-2 border-orange-200 text-orange-700 hover:bg-orange-50">
                       <FileText size={14} /> Proposal
                     </Button>
-                    <Button size="sm" className="gap-2 bg-accent">
+                    <Button
+                      size="sm"
+                      className="gap-2 bg-accent"
+                      onClick={() => {
+                        convertLead(lead.id);
+                      }}
+                    >
                       <Zap size={14} /> Convert to Project
                     </Button>
                   </div>

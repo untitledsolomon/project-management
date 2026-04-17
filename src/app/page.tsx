@@ -1,3 +1,5 @@
+"use client";
+
 import { MainLayout } from "@/components/layout/MainLayout";
 import { KPICards } from "@/components/dashboard/KPICards";
 import { MyTasks } from "@/components/dashboard/MyTasks";
@@ -8,14 +10,13 @@ import { Badge } from "@/components/ui/Badge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { AvatarGroup, Avatar } from "@/components/ui/Avatar";
 import { MoreHorizontal } from "lucide-react";
-
-const projects = [
-  { name: "Axis Platform", client: "Internal", progress: 65, tasks: 24, status: "In Progress", statusColor: "text-status-progress-text bg-status-progress-bg" },
-  { name: "Regent Portal", client: "Regent CAD", progress: 92, tasks: 4, status: "In Review", statusColor: "text-status-review-text bg-status-review-bg" },
-  { name: "Forge CMS", client: "Forge Inc.", progress: 12, tasks: 45, status: "In Progress", statusColor: "text-status-progress-text bg-status-progress-bg" },
-];
+import { useWorkspace } from "@/components/providers/WorkspaceProvider";
+import Link from "next/link";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { motion } from "framer-motion";
 
 export default function Home() {
+  const { projects, isLoading } = useWorkspace();
   return (
     <MainLayout title="Dashboard">
       <div className="mb-8">
@@ -25,11 +26,11 @@ export default function Home() {
 
       <KPICards />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8 items-start">
+        <div className="lg:col-span-2 h-full">
           <MyTasks />
         </div>
-        <div className="space-y-8">
+        <div className="flex flex-col gap-8 h-full">
           <AxisAI />
           <RecentActivity />
         </div>
@@ -41,8 +42,33 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {projects.map((project) => (
-          <Card key={project.name} className="hover:border-accent/50 transition-colors cursor-pointer group">
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="p-6 space-y-4">
+              <div className="flex justify-between">
+                <div className="space-y-2">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+                <Skeleton className="h-8 w-8 rounded-full" />
+              </div>
+              <Skeleton className="h-2 w-full" />
+              <div className="flex justify-between">
+                <Skeleton className="h-8 w-16" />
+                <Skeleton className="h-8 w-24" />
+              </div>
+            </Card>
+          ))
+        ) : (
+          projects.map((project, idx) => (
+            <motion.div
+              key={project.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+            >
+              <Link href={`/projects/${project.id}`}>
+                <Card className="hover:border-accent/50 transition-colors cursor-pointer group h-full">
             <CardContent className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
@@ -74,8 +100,11 @@ export default function Home() {
                 </div>
               </div>
             </CardContent>
-          </Card>
-        ))}
+                </Card>
+              </Link>
+            </motion.div>
+          ))
+        )}
       </div>
     </MainLayout>
   );

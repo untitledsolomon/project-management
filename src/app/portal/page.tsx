@@ -11,10 +11,9 @@ import {
   MessageSquare,
   Download,
   CheckCircle2,
-  Clock,
-  ChevronRight,
   Layers
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function ClientPortal() {
   return (
@@ -144,9 +143,4 @@ export default function ClientPortal() {
       </main>
     </div>
   );
-}
-
-// Inline helper
-function cn(...inputs: (string | boolean | undefined | null)[]) {
-  return inputs.filter(Boolean).join(" ");
 }

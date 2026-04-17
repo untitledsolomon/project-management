@@ -2,8 +2,10 @@ import * as React from "react";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Avatar } from "@/components/ui/Avatar";
-import { MessageSquare, Paperclip, CheckSquare } from "lucide-react";
+import { MessageSquare, Paperclip, CheckSquare, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 export interface Task {
   id: string;
@@ -29,12 +31,38 @@ const priorityColors = {
 };
 
 export function TaskCard({ task, onClick }: TaskCardProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
   return (
     <Card
-      className="mb-3 hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing group relative"
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "mb-3 hover:shadow-md transition-shadow group relative pl-2",
+        isDragging && "z-50 shadow-xl border-accent"
+      )}
       onClick={onClick}
     >
-      <div className="absolute left-0 top-0 bottom-0 w-1 bg-transparent group-hover:bg-accent/20 transition-colors rounded-l-card" />
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute left-0 top-0 bottom-0 w-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+      >
+        <GripVertical size={14} className="text-muted" />
+      </div>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-2">
           <Badge variant="priority" color={priorityColors[task.priority]} className="font-mono text-[10px] p-0">
