@@ -1,90 +1,121 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard,
-  Kanban,
-  Clock,
-  Settings,
+  CheckSquare,
+  Layers,
+  Inbox,
   Users,
+  BarChart2,
+  Settings,
+  Plus,
+  LogOut,
   ChevronLeft,
-  ChevronRight,
-  Sparkles,
-  Layers
+  ChevronRight
 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { PresenceIndicator } from "@/components/PresenceIndicator";
-
-const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "/" },
-  { label: "Projects", icon: Kanban, href: "/projects" },
-  { label: "Leads", icon: Sparkles, href: "/leads" },
-  { label: "Time & Billing", iconComp: Clock, href: "/billing" },
-  { label: "Team", iconComp: Users, href: "/team" },
-  { label: "Settings", iconComp: Settings, href: "/settings" },
-];
+import { Avatar } from "@/components/ui/Avatar";
+import { Button } from "@/components/ui/Button";
 
 export function Sidebar() {
-  const [isCollapsed, setIsCollapsed] = React.useState(false);
   const pathname = usePathname();
+  const { user, org, signOut } = useAuth();
+  const [collapsed, setCollapsed] = useState(false);
+
+  const navItems = [
+    { label: "Dashboard", icon: LayoutDashboard, href: "/" },
+    { label: "My Work", icon: CheckSquare, href: "/my-work" },
+    { label: "Projects", icon: Layers, href: "/projects" },
+    { label: "Inbox", icon: Inbox, href: "/inbox" },
+    { label: "People & Teams", icon: "/people", href: "/people", lucide: Users },
+    { label: "Reporting", icon: BarChart2, href: "/reporting" },
+    { label: "Settings", icon: Settings, href: "/settings" },
+  ];
 
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 h-full bg-white border-r border-border-base transition-all duration-300 z-50 flex flex-col",
-        isCollapsed ? "w-[64px]" : "w-[256px]"
+        "flex flex-col h-screen bg-white border-r border-border transition-all duration-300",
+        collapsed ? "w-[64px]" : "w-[256px]"
       )}
     >
       {/* Header */}
-      <div className="h-14 flex items-center px-4 border-b border-border-base justify-between">
-        {!isCollapsed && (
-          <span className="font-display text-2xl text-accent tracking-tight">Axis</span>
+      <div className="flex items-center justify-between p-4 mb-4">
+        {!collapsed && (
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-accent rounded flex items-center justify-center text-white font-display font-bold">R</div>
+            <span className="font-display font-bold text-lg">Regent PM</span>
+          </div>
         )}
-        {isCollapsed && <Layers className="text-accent h-6 w-6 mx-auto" />}
         <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hover:bg-surface-2 p-1 rounded-badge text-muted"
+          onClick={() => setCollapsed(!collapsed)}
+          className="p-1 hover:bg-surface-2 rounded text-secondary"
         >
-          {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 py-4 px-2 space-y-1 flex flex-col">
+      {/* New Project Button */}
+      {!collapsed && (
+        <div className="px-4 mb-6">
+          <Button className="w-full gap-2 justify-start">
+            <Plus size={18} />
+            New Project
+          </Button>
+        </div>
+      )}
+
+      {/* Navigation */}
+      <nav className="flex-1 px-2 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
+          const Icon = (item as any).lucide || item.icon;
           const isActive = pathname === item.href;
-          const Icon = item.iconComp || (item.icon as React.ElementType);
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center h-9 px-3 rounded-badge transition-colors",
+                "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
                 isActive
-                  ? "bg-surface-3 text-primary border-l-2 border-accent"
-                  : "text-secondary hover:bg-surface-2"
+                  ? "bg-accent/10 text-accent font-medium"
+                  : "text-secondary hover:bg-surface-2 hover:text-primary"
               )}
             >
-              <Icon size={18} className={isCollapsed ? "mx-auto" : "mr-3"} />
-              {!isCollapsed && <span className="text-sm font-medium">{item.label}</span>}
+              <Icon size={20} />
+              {!collapsed && <span>{item.label}</span>}
             </Link>
           );
         })}
-
-        {!isCollapsed && <PresenceIndicator />}
       </nav>
 
-      {/* Footer */}
-      <div className="p-2 border-t border-border-base space-y-1">
-        <button className="flex items-center w-full h-9 px-3 rounded-badge text-muted hover:bg-surface-2 transition-colors">
-          <Sparkles size={18} className={isCollapsed ? "mx-auto" : "mr-3"} />
-          {!isCollapsed && <span className="text-xs font-medium">Axis AI</span>}
-        </button>
-        <div className="pt-2 px-3">
-          {!isCollapsed && (
-            <p className="text-[10px] text-muted uppercase tracking-wider font-mono">Mobile app coming soon</p>
+      {/* User Footer */}
+      <div className="p-4 border-t border-border">
+        <div className={cn(
+          "flex items-center gap-3",
+          collapsed ? "justify-center" : ""
+        )}>
+          <Avatar
+            fallback={user?.full_name || "U"}
+            src={user?.avatar_url}
+            size="sm"
+          />
+          {!collapsed && (
+            <div className="flex-1 overflow-hidden">
+              <p className="text-sm font-medium text-primary truncate">{user?.full_name}</p>
+              <p className="text-xs text-secondary truncate">{org?.name}</p>
+            </div>
+          )}
+          {!collapsed && (
+            <button
+              onClick={signOut}
+              className="p-1 hover:bg-surface-2 rounded text-secondary"
+            >
+              <LogOut size={16} />
+            </button>
           )}
         </div>
       </div>

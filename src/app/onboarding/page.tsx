@@ -3,9 +3,8 @@
 import * as React from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Badge } from "@/components/ui/Badge";
 import { motion, AnimatePresence } from "framer-motion";
-import { Layers, Check, Users, Plus, Layout, ArrowRight } from "lucide-react";
+import { Layers, Check, Users, Layout, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export default function OnboardingPage() {

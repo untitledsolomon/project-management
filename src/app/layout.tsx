@@ -1,7 +1,6 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { CommandPalette } from "@/components/CommandPalette";
+import AppProviders from "@/providers/AppProviders";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,15 +12,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-display",
-  weight: "400",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
-  title: "Axis | Project Management",
-  description: "A premium project management platform for high-performance teams.",
+export const metadata = {
+  title: "Regent Project Manager",
+  description: "Modern project management for high-performance teams",
 };
 
 export default function RootLayout({
@@ -30,13 +23,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-surface-1 text-primary">
-        {children}
-        <CommandPalette />
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}>
+        <AppProviders>
+          {children}
+        </AppProviders>
       </body>
     </html>
   );

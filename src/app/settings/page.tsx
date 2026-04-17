@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import {
@@ -12,10 +12,10 @@ import {
   Link as LinkIcon,
   Bell,
   Globe,
-  Code,
-  Check
+  Code
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 const integrations = [
   { name: "Axis AI", desc: "Advanced project intelligence", status: "Active", icon: "✨", connected: true },
@@ -37,6 +37,8 @@ const navItems = [
 ];
 
 export default function SettingsPage() {
+  const [activeSection, setActiveSection] = React.useState("Integrations");
+
   return (
     <MainLayout title="Settings">
       <div className="mb-8">
@@ -49,12 +51,14 @@ export default function SettingsPage() {
         <aside className="w-full lg:w-48 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
+            const isActive = activeSection === item.label;
             return (
               <button
                 key={item.label}
+                onClick={() => setActiveSection(item.label)}
                 className={cn(
                   "w-full flex items-center gap-3 px-3 py-2 rounded-badge text-sm font-medium transition-colors",
-                  item.active
+                  isActive
                     ? "bg-surface-3 text-primary border-l-2 border-accent"
                     : "text-secondary hover:bg-surface-2"
                 )}
@@ -67,61 +71,113 @@ export default function SettingsPage() {
         </aside>
 
         {/* Content area */}
-        <div className="flex-1">
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-display">Integrations</h2>
-              <p className="text-sm text-muted">Connect your favorite tools to your Axis workspace.</p>
-            </div>
-            <Button variant="secondary" size="sm">Add Integration</Button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {integrations.map((int) => (
-              <Card key={int.name} className={cn("transition-all", int.connected ? "border-accent/10 bg-accent/5" : "hover:border-border-base")}>
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="h-10 w-10 rounded-card bg-white border border-border-base flex items-center justify-center text-xl shadow-sm">
-                      {int.icon}
-                    </div>
-                    <Badge
-                      className={cn(
-                        int.connected ? "bg-status-progress-bg text-status-progress-text" : "bg-status-todo-bg text-status-todo-text",
-                        int.status === "Coming Soon" && "opacity-50"
-                      )}
-                    >
-                      {int.status}
-                    </Badge>
+        <div className="flex-1 min-h-[400px]">
+          <AnimatePresence mode="wait">
+            {activeSection === "Integrations" && (
+              <motion.div
+                key="integrations"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+              >
+                <div className="mb-8 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-display">Integrations</h2>
+                    <p className="text-sm text-muted">Connect your favorite tools to your Axis workspace.</p>
                   </div>
-                  <h3 className="font-semibold text-primary mb-1">{int.name}</h3>
-                  <p className="text-xs text-secondary mb-4">{int.desc}</p>
-                  <Button
-                    variant={int.connected ? "ghost" : "secondary"}
-                    size="sm"
-                    className="w-full h-8 text-xs font-mono"
-                  >
-                    {int.connected ? "Configure" : "Connect"}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="mt-12">
-            <h3 className="text-lg font-display mb-4">API Access</h3>
-            <Card>
-              <CardContent className="p-6">
-                <p className="text-sm text-secondary mb-6">Use your secret token to access the Axis API and build custom integrations.</p>
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 font-mono text-xs bg-surface-2 p-3 rounded-input border border-border-base text-muted overflow-hidden truncate">
-                    ax_live_51P2zWkL0s8nQ7x...
-                  </div>
-                  <Button variant="secondary" size="sm">Regenerate</Button>
-                  <Button variant="primary" size="sm">Copy</Button>
+                  <Button variant="secondary" size="sm">Add Integration</Button>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {integrations.map((int) => (
+                    <Card key={int.name} className={cn("transition-all", int.connected ? "border-accent/10 bg-accent/5" : "hover:border-border-base")}>
+                      <CardContent className="p-5">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="h-10 w-10 rounded-card bg-white border border-border-base flex items-center justify-center text-xl shadow-sm">
+                            {int.icon}
+                          </div>
+                          <Badge
+                            className={cn(
+                              int.connected ? "bg-status-progress-bg text-status-progress-text" : "bg-status-todo-bg text-status-todo-text",
+                              int.status === "Coming Soon" && "opacity-50"
+                            )}
+                          >
+                            {int.status}
+                          </Badge>
+                        </div>
+                        <h3 className="font-semibold text-primary mb-1">{int.name}</h3>
+                        <p className="text-xs text-secondary mb-4">{int.desc}</p>
+                        <Button
+                          variant={int.connected ? "ghost" : "secondary"}
+                          size="sm"
+                          className="w-full h-8 text-xs font-mono"
+                        >
+                          {int.connected ? "Configure" : "Connect"}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {activeSection === "API" && (
+              <motion.div
+                key="api"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+              >
+                <div className="mb-8">
+                  <h2 className="text-2xl font-display">API & Webhooks</h2>
+                  <p className="text-sm text-muted">Build custom integrations using Axis API tokens.</p>
+                </div>
+
+                <Card className="mb-8">
+                  <CardContent className="p-6">
+                    <h3 className="text-sm font-semibold mb-2">Personal Access Token</h3>
+                    <p className="text-xs text-secondary mb-6">Use this token to authenticate requests to the Axis API. Treat it like a password.</p>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 font-mono text-xs bg-surface-2 p-3 rounded-input border border-border-base text-muted overflow-hidden truncate">
+                        ax_live_51P2zWkL0s8nQ7x...
+                      </div>
+                      <Button variant="secondary" size="sm">Regenerate</Button>
+                      <Button variant="primary" size="sm">Copy</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-display">Webhooks</h3>
+                  <p className="text-sm text-muted mb-4">Receive real-time notifications when events happen in your workspace.</p>
+                  <Card>
+                    <CardContent className="p-6 flex items-center justify-between">
+                      <div>
+                        <h4 className="text-sm font-medium">No webhooks configured</h4>
+                        <p className="text-xs text-muted">Add a webhook URL to start receiving events.</p>
+                      </div>
+                      <Button size="sm">Add Webhook</Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </motion.div>
+            )}
+
+            {!["Integrations", "API"].includes(activeSection) && (
+              <motion.div
+                key="fallback"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="h-full flex flex-col items-center justify-center text-center p-12"
+              >
+                <div className="h-16 w-16 bg-surface-2 rounded-full flex items-center justify-center mb-4">
+                  <Globe size={32} className="text-muted" />
+                </div>
+                <h3 className="text-lg font-display mb-2">{activeSection} Settings</h3>
+                <p className="text-sm text-muted">This section is being prepared for your workspace.</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </MainLayout>

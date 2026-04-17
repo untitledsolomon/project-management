@@ -3,18 +3,80 @@
 import * as React from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Avatar } from "@/components/ui/Avatar";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, X, Layout, Maximize2, Minimize2, Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useWorkspace } from "@/components/providers/WorkspaceProvider";
 
-const tasks = [
-  { id: "AX-101", title: "User interview synthesis", status: "Todo", statusColor: "bg-status-todo-bg text-status-todo-text", priority: "P2", priorityColor: "#EA580C", assignee: "SK", dueDate: "Jan 25", project: "Axis Platform" },
-  { id: "AX-102", title: "Finalize brand guidelines", status: "In Progress", statusColor: "bg-status-progress-bg text-status-progress-text", priority: "P1", priorityColor: "#BE123C", assignee: "SK", dueDate: "Today", project: "Axis Platform" },
-  { id: "AX-104", title: "Define design tokens", status: "Todo", statusColor: "bg-status-todo-bg text-status-todo-text", priority: "P1", priorityColor: "#BE123C", assignee: "EM", dueDate: "Today", project: "Axis Platform" },
-  { id: "AX-98", title: "QA Mobile responsiveness", status: "In Review", statusColor: "bg-status-review-bg text-status-review-text", priority: "P3", priorityColor: "#CA8A04", assignee: "JD", dueDate: "Jan 22", project: "Axis Platform" },
-];
+export function ListView({ onTaskClick }: { onTaskClick?: (taskId: string) => void }) {
+  const { tasks, updateTask, deleteTask } = useWorkspace();
+  const [density, setDensity] = React.useState<"compact" | "comfortable" | "spacious">("comfortable");
+  const [searchTerm, setSearchTerm] = React.useState("");
 
-export function ListView({ onTaskClick }: { onTaskClick?: () => void }) {
+  const filteredTasks = tasks.filter(t =>
+    t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    t.id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const densityStyles = {
+    compact: "py-1.5 px-4 text-[13px]",
+    comfortable: "py-3 px-4 text-sm",
+    spacious: "py-5 px-4 text-base",
+  };
+
+  const [isAdding, setIsAdding] = React.useState(false);
+  const [newTaskTitle, setNewTaskTitle] = React.useState("");
+  const { addTask } = useWorkspace();
+
+  const handleAddTask = () => {
+    if (!newTaskTitle.trim()) return;
+    addTask({
+      title: newTaskTitle,
+      status: "todo",
+      priority: "P3",
+      assignee: { name: "Solomon", fallback: "SK" },
+      dueDate: "Tomorrow",
+      project: "Axis Platform",
+      subtasks: { completed: 0, total: 0 }
+    });
+    setNewTaskTitle("");
+    setIsAdding(false);
+  };
+
   return (
-    <div className="bg-white border border-border-base rounded-card overflow-hidden">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between px-1">
+        <div className="relative flex-1 max-w-sm">
+          <Plus className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted h-3.5 w-3.5 rotate-45" />
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-8 pr-3 py-1.5 bg-white border border-border-base rounded-badge text-xs outline-none focus:ring-1 focus:ring-accent"
+          />
+        </div>
+        <div className="flex gap-2">
+        {[
+          { id: "compact", icon: Minimize2, label: "Compact" },
+          { id: "comfortable", icon: Layout, label: "Comfortable" },
+          { id: "spacious", icon: Maximize2, label: "Spacious" },
+        ].map((d) => (
+          <button
+            key={d.id}
+            onClick={() => setDensity(d.id as "compact" | "comfortable" | "spacious")}
+            className={cn(
+              "flex items-center gap-2 px-2 py-1 rounded-badge text-[10px] font-mono uppercase tracking-wider transition-colors",
+              density === d.id ? "bg-accent text-white" : "text-muted hover:bg-surface-2"
+            )}
+            title={d.label}
+          >
+            <d.icon size={12} />
+            {density === d.id && <span>{d.label}</span>}
+          </button>
+        ))}
+      </div>
+      </div>
+      <div className="bg-white border border-border-base rounded-card overflow-hidden shadow-axis">
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b border-border-base bg-surface-2 text-[10px] font-mono uppercase tracking-wider text-muted">
@@ -33,39 +95,84 @@ export function ListView({ onTaskClick }: { onTaskClick?: () => void }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-border-base">
-          {tasks.map((task) => (
-            <tr
-              key={task.id}
-              className="group hover:bg-surface-2 transition-colors cursor-pointer text-sm"
-              onClick={onTaskClick}
-            >
-              <td className="px-6 py-3"><input type="checkbox" className="rounded" /></td>
-              <td className="px-4 py-3 font-medium text-primary">{task.title}</td>
-              <td className="px-4 py-3">
-                <Badge className={task.statusColor}>{task.status}</Badge>
-              </td>
-              <td className="px-4 py-3">
-                <Avatar fallback={task.assignee} size="sm" />
-              </td>
-              <td className="px-4 py-3">
-                <Badge variant="priority" color={task.priorityColor}>{task.id}</Badge>
-              </td>
-              <td className="px-4 py-3 text-secondary">{task.dueDate}</td>
-              <td className="px-4 py-3">
-                <Badge variant="outline">{task.project}</Badge>
-              </td>
-              <td className="px-4 py-3 text-right pr-6">
-                <button className="text-muted opacity-0 group-hover:opacity-100 transition-opacity">
-                  <MoreHorizontal size={16} />
-                </button>
-              </td>
-            </tr>
-          ))}
+          {filteredTasks.map((task) => {
+            const statusColors: Record<string, string> = {
+              "todo": "bg-status-todo-bg text-status-todo-text",
+              "in-progress": "bg-status-progress-bg text-status-progress-text",
+              "review": "bg-status-review-bg text-status-review-text",
+              "done": "bg-status-done-bg text-status-done-text",
+            };
+
+            const priorityColors: Record<string, string> = {
+              "P1": "#BE123C",
+              "P2": "#EA580C",
+              "P3": "#CA8A04",
+              "P4": "#9090A0",
+            };
+
+            return (
+              <tr
+                key={task.id}
+                className={cn("group hover:bg-surface-2 transition-colors cursor-pointer", density === "compact" ? "text-[13px]" : density === "comfortable" ? "text-sm" : "text-base")}
+                onClick={() => onTaskClick?.(task.id)}
+              >
+                <td className={cn(densityStyles[density], "w-10 pl-6")}><input type="checkbox" className="rounded" /></td>
+                <td className={cn(densityStyles[density], "font-medium text-primary")}>{task.title}</td>
+                <td className={densityStyles[density]}>
+                  <Badge className={statusColors[task.status] || "bg-status-todo-bg text-status-todo-text"}>
+                    {task.status.charAt(0).toUpperCase() + task.status.slice(1).replace("-", " ")}
+                  </Badge>
+                </td>
+                <td className={densityStyles[density]}>
+                  <Avatar fallback={task.assignee.fallback} size={density === "compact" ? "sm" : "md"} />
+                </td>
+                <td className={densityStyles[density]}>
+                  <Badge variant="priority" color={priorityColors[task.priority]}>{task.id}</Badge>
+                </td>
+                <td className={cn(densityStyles[density], "text-secondary")}>{task.dueDate}</td>
+                <td className={densityStyles[density]}>
+                  <Badge variant="outline">{task.project}</Badge>
+                </td>
+                <td className={cn(densityStyles[density], "text-right pr-6")} onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => { if(confirm("Delete task?")) deleteTask(task.id); }}
+                    className="text-muted opacity-0 group-hover:opacity-100 transition-opacity hover:text-p1"
+                  >
+                    <X size={16} />
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
       <div className="p-3 border-t border-border-base bg-surface-1">
-        <button className="text-xs text-accent font-medium hover:underline ml-12">+ Add new task</button>
+        {isAdding ? (
+          <div className="flex items-center gap-3 ml-12 pr-6">
+            <input
+              autoFocus
+              className="flex-1 h-8 bg-white border border-accent rounded px-3 text-xs outline-none shadow-sm"
+              placeholder="What needs to be done?"
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAddTask();
+                if (e.key === "Escape") setIsAdding(false);
+              }}
+            />
+            <button onClick={handleAddTask} className="text-xs font-semibold text-accent">Save</button>
+            <button onClick={() => setIsAdding(false)} className="text-xs text-muted">Cancel</button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setIsAdding(true)}
+            className="text-xs text-accent font-medium hover:underline ml-12"
+          >
+            + Add new task
+          </button>
+        )}
       </div>
+    </div>
     </div>
   );
 }
