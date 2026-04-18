@@ -1,11 +1,14 @@
 "use client";
 
+import * as React from "react";
 import { useParams } from "next/navigation";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useProjectTasks } from "@/lib/tasks/queries";
 import { useProjectSections } from "@/lib/sections/queries";
 import { useProjects } from "@/lib/projects/queries";
 import { KanbanBoard } from "@/components/views/kanban/KanbanBoard";
+import { ListView } from "@/components/views/list/ListView";
+import { TaskDetailPanel } from "@/components/tasks/TaskDetailPanel";
 import { Button } from "@/components/ui/Button";
 import { LayoutGrid, List, Calendar, Settings, Share2, Plus } from "lucide-react";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -13,11 +16,15 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 
 export default function ProjectPage() {
   const { id } = useParams();
+  const [activeTab, setActiveTab] = React.useState("kanban");
+  const [selectedTaskId, setSelectedTaskId] = React.useState<string | null>(null);
+
   const { data: projects } = useProjects();
   const { data: tasks, isLoading: tasksLoading } = useProjectTasks(id as string);
   const { data: sections, isLoading: sectionsLoading } = useProjectSections(id as string);
 
   const project = projects?.find(p => p.id === id);
+  const selectedTask = tasks?.find(t => t.id === selectedTaskId);
 
   if (tasksLoading || sectionsLoading) {
     return (
@@ -54,7 +61,7 @@ export default function ProjectPage() {
       <div className="flex flex-col h-full">
         {/* Toolbar */}
         <div className="flex items-center justify-between mb-6 border-b border-border pb-4">
-          <Tabs defaultValue="kanban">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList>
               <TabsTrigger value="kanban" className="gap-2">
                 <LayoutGrid size={16} />
@@ -78,10 +85,26 @@ export default function ProjectPage() {
           </div>
         </div>
 
-        {/* Board */}
-        {sections && tasks && (
-          <KanbanBoard initialSections={sections} initialTasks={tasks} />
-        )}
+        {/* Views */}
+        <div className="flex-1 overflow-hidden relative">
+          {activeTab === "kanban" && sections && tasks && (
+            <KanbanBoard initialSections={sections} initialTasks={tasks} onTaskClick={setSelectedTaskId} />
+          )}
+          {activeTab === "list" && tasks && (
+            <ListView tasks={tasks} onTaskClick={setSelectedTaskId} />
+          )}
+          {activeTab === "timeline" && (
+            <div className="flex flex-col items-center justify-center h-full text-muted">
+              <Calendar size={48} className="mb-4 opacity-20" />
+              <p className="text-sm font-medium">Timeline View coming in Phase 2</p>
+            </div>
+          )}
+        </div>
+
+        <TaskDetailPanel
+          task={selectedTask || null}
+          onClose={() => setSelectedTaskId(null)}
+        />
       </div>
     </MainLayout>
   );

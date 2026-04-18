@@ -31,7 +31,7 @@ export function Sidebar() {
     { label: "My Work", icon: CheckSquare, href: "/my-work" },
     { label: "Projects", icon: Layers, href: "/projects" },
     { label: "Inbox", icon: Inbox, href: "/inbox" },
-    { label: "People & Teams", icon: "/people", href: "/people", lucide: Users },
+    { label: "People & Teams", icon: Users, href: "/people" },
     { label: "Reporting", icon: BarChart2, href: "/reporting" },
     { label: "Settings", icon: Settings, href: "/settings" },
   ];
@@ -72,7 +72,7 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 px-2 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
-          const Icon = (item as any).lucide || item.icon;
+          const Icon = item.icon;
           const isActive = pathname === item.href;
           return (
             <Link

@@ -1,8 +1,9 @@
 "use client";
 
-import { Search, Bell, Plus, User } from "lucide-react";
+import { Search, Plus, User } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { NotificationCenter } from "./NotificationCenter";
 
 export function Topbar() {
   return (
@@ -23,10 +24,7 @@ export function Topbar() {
             <Plus size={16} />
             Quick Add
           </Button>
-          <Button variant="ghost" size="sm" className="relative p-2">
-            <Bell size={18} />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-p1 rounded-full border-2 border-white"></span>
-          </Button>
+          <NotificationCenter />
         </div>
 
         <div className="w-px h-6 bg-border mx-2"></div>

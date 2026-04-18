@@ -10,7 +10,7 @@ import {
   CommandList,
   CommandSeparator
 } from "@/components/ui/Command";
-import { Search, CheckSquare, Layers, User, Plus } from "lucide-react";
+import { Search, CheckSquare, Layers, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useProjects } from "@/lib/projects/queries";
 

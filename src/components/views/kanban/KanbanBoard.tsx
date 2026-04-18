@@ -27,9 +27,10 @@ import { TaskCard } from "./TaskCard";
 interface KanbanBoardProps {
   initialSections: Section[];
   initialTasks: Task[];
+  onTaskClick?: (taskId: string) => void;
 }
 
-export function KanbanBoard({ initialSections, initialTasks }: KanbanBoardProps) {
+export function KanbanBoard({ initialSections, initialTasks, onTaskClick }: KanbanBoardProps) {
   const [sections, setSections] = useState<Section[]>(initialSections);
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
@@ -177,6 +178,7 @@ export function KanbanBoard({ initialSections, initialTasks }: KanbanBoardProps)
                 key={section.id}
                 section={section}
                 tasks={tasksBySection[section.id] || []}
+                onTaskClick={onTaskClick}
               />
             ))}
           </SortableContext>

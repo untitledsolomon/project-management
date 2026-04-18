@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
 
 interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'secondary' | 'outline' | 'destructive' | 'success' | 'warning';
+  variant?: 'default' | 'secondary' | 'outline' | 'destructive' | 'success' | 'warning' | 'priority';
 }
 
-export function Badge({ children, variant = 'default', className, ...props }: BadgeProps) {
+export function Badge({ children, variant = 'default', className, style, ...props }: BadgeProps) {
   const variants = {
     default: 'bg-primary text-white',
     secondary: 'bg-secondary text-white',
@@ -12,6 +12,7 @@ export function Badge({ children, variant = 'default', className, ...props }: Ba
     destructive: 'bg-p1 text-white',
     success: 'bg-emerald-500 text-white',
     warning: 'bg-amber-500 text-white',
+    priority: 'w-2 h-2 rounded-full border border-white/20',
   };
 
   return (
@@ -21,6 +22,7 @@ export function Badge({ children, variant = 'default', className, ...props }: Ba
         variants[variant],
         className
       )}
+      style={style}
       {...props}
     >
       {children}

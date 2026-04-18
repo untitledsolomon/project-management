@@ -13,9 +13,10 @@ import { cn } from "@/lib/utils";
 interface TaskCardProps {
   task: Task;
   isOverlay?: boolean;
+  onClick?: (taskId: string) => void;
 }
 
-export function TaskCard({ task, isOverlay }: TaskCardProps) {
+export function TaskCard({ task, isOverlay, onClick }: TaskCardProps) {
   const {
     attributes,
     listeners,
@@ -52,12 +53,13 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
       style={style}
       {...attributes}
       {...listeners}
+      onClick={() => onClick?.(task.id)}
       className={cn(
-        "group mb-3 cursor-grab active:cursor-grabbing outline-none",
+        "group mb-3 cursor-grab active:cursor-grabbing outline-none transition-all duration-200 hover:scale-[1.02]",
         isOverlay ? "rotate-3 scale-105 z-50 shadow-xl" : ""
       )}
     >
-      <Card className="hover:border-accent transition-colors">
+      <Card className="hover:border-accent transition-all duration-200 hover:shadow-md">
         <CardContent className="p-3">
           <div className="flex justify-between items-start mb-2">
             <PriorityBadge priority={task.priority} />

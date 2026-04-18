@@ -11,8 +11,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
+  }, []);
 
+  useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
         setUser({
@@ -29,9 +32,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .single();
 
         if (profile) {
-          setRole(profile.role);
+          setRole(profile.role as 'owner' | 'admin' | 'member' | 'guest');
           if (profile.organisations) {
-            setOrg(profile.organisations as any);
+            const orgData = profile.organisations as unknown as { id: string; name: string; logo_url?: string };
+            setOrg(orgData);
           }
         }
       } else {
