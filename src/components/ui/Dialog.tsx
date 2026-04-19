@@ -3,9 +3,14 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
-import { X } from "lucide-react";
 
-export function Dialog({ open, onOpenChange, children }: any) {
+interface DialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  children: React.ReactNode;
+}
+
+export function Dialog({ open, onOpenChange, children }: DialogProps) {
   if (!open) return null;
 
   return createPortal(
@@ -22,7 +27,12 @@ export function Dialog({ open, onOpenChange, children }: any) {
   );
 }
 
-export function DialogContent({ className, children }: any) {
+interface DialogContentProps {
+  className?: string;
+  children: React.ReactNode;
+}
+
+export function DialogContent({ className, children }: DialogContentProps) {
   return (
     <div className={cn("bg-white rounded-card shadow-lg p-6 max-w-lg w-full", className)}>
       {children}
@@ -30,13 +40,21 @@ export function DialogContent({ className, children }: any) {
   );
 }
 
-export function DialogHeader({ className, ...props }: any) {
+interface DialogHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  className?: string;
+}
+
+export function DialogHeader({ className, ...props }: DialogHeaderProps) {
   return (
     <div className={cn("flex flex-col space-y-1.5 text-center sm:text-left mb-4", className)} {...props} />
   );
 }
 
-export function DialogTitle({ className, ...props }: any) {
+interface DialogTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
+  className?: string;
+}
+
+export function DialogTitle({ className, ...props }: DialogTitleProps) {
   return (
     <h2 className={cn("text-lg font-display font-semibold leading-none tracking-tight", className)} {...props} />
   );

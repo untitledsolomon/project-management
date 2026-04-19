@@ -13,9 +13,10 @@ import { cn } from "@/lib/utils";
 interface KanbanColumnProps {
   section: Section;
   tasks: Task[];
+  onTaskClick?: (task: Task) => void;
 }
 
-export function KanbanColumn({ section, tasks }: KanbanColumnProps) {
+export function KanbanColumn({ section, tasks, onTaskClick }: KanbanColumnProps) {
   const {
     setNodeRef,
     attributes,
@@ -68,7 +69,7 @@ export function KanbanColumn({ section, tasks }: KanbanColumnProps) {
       <div className="flex-1 overflow-y-auto">
         <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
           {tasks.map((task) => (
-            <TaskCard key={task.id} task={task} />
+            <TaskCard key={task.id} task={task} onClick={onTaskClick} />
           ))}
         </SortableContext>
       </div>

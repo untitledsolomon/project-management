@@ -6,12 +6,24 @@ import { useAuthStore } from '@/hooks/useAuthStore';
 
 const AuthContext = createContext({});
 
+interface ProfileData {
+  org_id: string | null;
+  role: 'owner' | 'admin' | 'member' | 'guest' | null;
+  organisations: {
+    id: string;
+    name: string;
+    logo_url: string | null;
+  } | null;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { setUser, setOrg, setRole, setLoading } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const t = setTimeout(() => {
+      setMounted(true);
+    }, 0);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
@@ -29,9 +41,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .single();
 
         if (profile) {
-          setRole(profile.role);
-          if (profile.organisations) {
-            setOrg(profile.organisations as any);
+          const typedProfile = profile as unknown as ProfileData;
+          setRole(typedProfile.role);
+          if (typedProfile.organisations) {
+            setOrg({
+              id: typedProfile.organisations.id,
+              name: typedProfile.organisations.name,
+              logo_url: typedProfile.organisations.logo_url || undefined
+            });
           }
         }
       } else {
@@ -43,6 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => {
+      clearTimeout(t);
       subscription.unsubscribe();
     };
   }, [setUser, setOrg, setRole, setLoading]);

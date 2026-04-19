@@ -2,17 +2,21 @@
 
 import { useParams } from "next/navigation";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { useProjectTasks } from "@/lib/tasks/queries";
+import { useProjectTasks, Task } from "@/lib/tasks/queries";
 import { useProjectSections } from "@/lib/sections/queries";
 import { useProjects } from "@/lib/projects/queries";
 import { KanbanBoard } from "@/components/views/kanban/KanbanBoard";
+import { ListView } from "@/components/views/list/ListView";
 import { Button } from "@/components/ui/Button";
 import { LayoutGrid, List, Calendar, Settings, Share2, Plus } from "lucide-react";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
+import { TaskDetailPanel } from "@/components/tasks/TaskDetailPanel";
+import { useState } from "react";
 
 export default function ProjectPage() {
   const { id } = useParams();
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const { data: projects } = useProjects();
   const { data: tasks, isLoading: tasksLoading } = useProjectTasks(id as string);
   const { data: sections, isLoading: sectionsLoading } = useProjectSections(id as string);
@@ -51,25 +55,23 @@ export default function ProjectPage() {
         </div>
       }
     >
-      <div className="flex flex-col h-full">
+      <Tabs defaultValue="kanban" className="flex flex-col h-full">
         {/* Toolbar */}
         <div className="flex items-center justify-between mb-6 border-b border-border pb-4">
-          <Tabs defaultValue="kanban">
-            <TabsList>
-              <TabsTrigger value="kanban" className="gap-2">
-                <LayoutGrid size={16} />
-                Kanban
-              </TabsTrigger>
-              <TabsTrigger value="list" className="gap-2">
-                <List size={16} />
-                List
-              </TabsTrigger>
-              <TabsTrigger value="timeline" className="gap-2">
-                <Calendar size={16} />
-                Timeline
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <TabsList>
+            <TabsTrigger value="kanban" className="gap-2">
+              <LayoutGrid size={16} />
+              Kanban
+            </TabsTrigger>
+            <TabsTrigger value="list" className="gap-2">
+              <List size={16} />
+              List
+            </TabsTrigger>
+            <TabsTrigger value="timeline" className="gap-2">
+              <Calendar size={16} />
+              Timeline
+            </TabsTrigger>
+          </TabsList>
 
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm">
@@ -78,11 +80,35 @@ export default function ProjectPage() {
           </div>
         </div>
 
-        {/* Board */}
-        {sections && tasks && (
-          <KanbanBoard initialSections={sections} initialTasks={tasks} />
-        )}
-      </div>
+        {/* Content */}
+        <TabsContent value="kanban" className="flex-1 min-h-0 border-none p-0 outline-none">
+          {sections && tasks && (
+            <KanbanBoard
+              initialSections={sections}
+              initialTasks={tasks}
+              onTaskClick={(task) => setSelectedTask(task)}
+            />
+          )}
+        </TabsContent>
+
+        <TabsContent value="list" className="flex-1 min-h-0 border-none p-0 outline-none">
+          <ListView
+            projectId={id as string}
+            onTaskClick={(task) => setSelectedTask(task)}
+          />
+        </TabsContent>
+
+        <TabsContent value="timeline" className="flex-1 min-h-0 border-none p-0 outline-none">
+          <div className="flex items-center justify-center h-full text-muted italic">
+            Timeline view coming in Phase 2
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      <TaskDetailPanel
+        task={selectedTask}
+        onClose={() => setSelectedTask(null)}
+      />
     </MainLayout>
   );
 }
