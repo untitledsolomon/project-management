@@ -12,7 +12,8 @@ import {
   Plus,
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  LucideIcon
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -21,12 +22,19 @@ import { cn } from "@/lib/utils";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 
+interface NavItem {
+  label: string;
+  icon: LucideIcon | string;
+  href: string;
+  lucide?: LucideIcon;
+}
+
 export function Sidebar() {
   const pathname = usePathname();
   const { user, org, signOut } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
 
-  const navItems = [
+  const navItems: NavItem[] = [
     { label: "Dashboard", icon: LayoutDashboard, href: "/" },
     { label: "My Work", icon: CheckSquare, href: "/my-work" },
     { label: "Projects", icon: Layers, href: "/projects" },
@@ -72,7 +80,7 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 px-2 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
-          const Icon = (item as any).lucide || item.icon;
+          const Icon = item.lucide || (item.icon as LucideIcon);
           const isActive = pathname === item.href;
           return (
             <Link

@@ -9,13 +9,20 @@ import { DueDateBadge } from "@/components/ui/DueDateBadge";
 import { Avatar, AvatarGroup } from "@/components/ui/Avatar";
 import { MessageSquare, Paperclip, CheckSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSubtasks, useTaskComments } from "@/lib/tasks/queries";
 
 interface TaskCardProps {
   task: Task;
   isOverlay?: boolean;
+  onClick?: (task: Task) => void;
 }
 
-export function TaskCard({ task, isOverlay }: TaskCardProps) {
+export function TaskCard({ task, isOverlay, onClick }: TaskCardProps) {
+  const { data: subtasks } = useSubtasks(task.id);
+  const { data: comments } = useTaskComments(task.id);
+
+  const subtasksCount = subtasks?.length || 0;
+  const subtasksCompleted = subtasks?.filter(s => s.status === 'done').length || 0;
   const {
     attributes,
     listeners,
@@ -56,6 +63,7 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
         "group mb-3 cursor-grab active:cursor-grabbing outline-none",
         isOverlay ? "rotate-3 scale-105 z-50 shadow-xl" : ""
       )}
+      onClick={() => onClick?.(task)}
     >
       <Card className="hover:border-accent transition-colors">
         <CardContent className="p-3">
@@ -85,14 +93,18 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
           </div>
 
           <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border/50 text-[10px] text-muted">
-            <div className="flex items-center gap-1">
-              <CheckSquare size={12} />
-              <span>0</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <MessageSquare size={12} />
-              <span>0</span>
-            </div>
+            {(subtasksCount > 0) && (
+              <div className="flex items-center gap-1">
+                <CheckSquare size={12} />
+                <span>{subtasksCompleted}/{subtasksCount}</span>
+              </div>
+            )}
+            {(comments?.length || 0) > 0 && (
+              <div className="flex items-center gap-1">
+                <MessageSquare size={12} />
+                <span>{comments?.length}</span>
+              </div>
+            )}
             <div className="flex items-center gap-1">
               <Paperclip size={12} />
               <span>0</span>

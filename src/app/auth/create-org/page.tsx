@@ -40,8 +40,8 @@ export default function CreateOrgPage() {
 
       toast.success("Organisation created!");
       router.push("/");
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
