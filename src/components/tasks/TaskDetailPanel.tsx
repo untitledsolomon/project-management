@@ -1,13 +1,27 @@
 "use client";
 
-import { Task, useUpdateTask, useSubtasks, useCreateTask, useTaskActivity, useTaskComments, useCreateComment } from "@/lib/tasks/queries";
+import {
+  Task,
+  useUpdateTask,
+  useSubtasks,
+  useCreateTask,
+  useTaskActivity,
+  useTaskComments,
+  useCreateComment,
+  useTaskLabels,
+  useLabelsForTask,
+  useUpdateTaskLabels,
+  useProjectMembers
+} from "@/lib/tasks/queries";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { PriorityBadge } from "@/components/ui/PriorityBadge";
 import { DueDateBadge } from "@/components/ui/DueDateBadge";
 import { Avatar } from "@/components/ui/Avatar";
-import { X, CheckSquare, MessageSquare, Clock, Plus, Send } from "lucide-react";
+import { X, CheckSquare, MessageSquare, Clock, Plus, Send, Tag, Users } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 
 interface TaskDetailPanelProps {
   task: Task | null;
@@ -18,11 +32,19 @@ export function TaskDetailPanel({ task, onClose }: TaskDetailPanelProps) {
   const updateTaskMutation = useUpdateTask();
   const createTaskMutation = useCreateTask();
   const createCommentMutation = useCreateComment();
+  const updateTaskLabelsMutation = useUpdateTaskLabels();
+
   const { data: subtasks } = useSubtasks(task?.id || "");
   const { data: activity } = useTaskActivity(task?.id || "");
   const { data: comments } = useTaskComments(task?.id || "");
+  const { data: projectLabels } = useTaskLabels(task?.project_id || "");
+  const { data: taskLabels } = useLabelsForTask(task?.id || "");
+  const { data: projectMembers } = useProjectMembers(task?.project_id || "");
+
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
   const [newComment, setNewComment] = useState("");
+  const [isLabelSelectorOpen, setIsLabelSelectorOpen] = useState(false);
+  const [isAssigneeSelectorOpen, setIsAssigneeSelectorOpen] = useState(false);
 
   if (!task) return null;
 
@@ -98,12 +120,53 @@ export function TaskDetailPanel({ task, onClose }: TaskDetailPanelProps) {
 
           <div className="grid grid-cols-2 gap-6 mb-8 text-sm">
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-secondary">Assignee</span>
-                <div className="flex items-center gap-2">
-                  <Avatar fallback="U" size="xs" />
-                  <span className="font-medium text-primary">Unassigned</span>
+              <div className="relative">
+                <div className="flex items-center justify-between">
+                  <span className="text-secondary">Assignees</span>
+                  <div
+                    className="flex items-center -space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => setIsAssigneeSelectorOpen(!isAssigneeSelectorOpen)}
+                  >
+                    {task.assignee_ids && task.assignee_ids.length > 0 ? (
+                      task.assignee_ids.map(id => {
+                        const member = projectMembers?.find(m => m.id === id);
+                        return <Avatar key={id} fallback={member?.full_name?.charAt(0) || "U"} size="xs" className="border-2 border-white" />;
+                      })
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Avatar fallback="?" size="xs" />
+                        <span className="font-medium text-primary">Unassigned</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
+                {isAssigneeSelectorOpen && (
+                  <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-border rounded-lg shadow-lg z-20 p-2">
+                    <p className="text-[10px] font-bold text-muted uppercase px-2 mb-2">Project Members</p>
+                    <div className="space-y-1 max-h-48 overflow-y-auto">
+                      {projectMembers?.map(member => (
+                        <button
+                          key={member.id}
+                          className={cn(
+                            "w-full flex items-center gap-2 p-2 rounded hover:bg-surface-2 text-left text-xs",
+                            task.assignee_ids?.includes(member.id) ? "bg-accent/10 text-accent" : "text-primary"
+                          )}
+                          onClick={() => {
+                            const currentIds = task.assignee_ids || [];
+                            const newIds = currentIds.includes(member.id)
+                              ? currentIds.filter(id => id !== member.id)
+                              : [...currentIds, member.id];
+                            updateTaskMutation.mutate({ id: task.id, updates: { assignee_ids: newIds } });
+                          }}
+                        >
+                          <Avatar fallback={member.full_name?.charAt(0) || "U"} size="xs" />
+                          <span className="flex-1 truncate">{member.full_name}</span>
+                          {task.assignee_ids?.includes(member.id) && <CheckSquare size={12} />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-secondary">Due Date</span>
@@ -122,6 +185,80 @@ export function TaskDetailPanel({ task, onClose }: TaskDetailPanelProps) {
                   <span>{task.estimated_minutes || 0}m</span>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-semibold text-primary">Labels</h4>
+              <button
+                onClick={() => setIsLabelSelectorOpen(!isLabelSelectorOpen)}
+                className="p-1 hover:bg-surface-2 rounded text-muted hover:text-accent transition-colors"
+              >
+                <Plus size={14} />
+              </button>
+            </div>
+            <div className="relative">
+              <div className="flex flex-wrap gap-2 mb-2">
+                {taskLabels && taskLabels.length > 0 ? (
+                  taskLabels.map((assignment) => (
+                    <Badge
+                      key={assignment.label_id}
+                      style={{ backgroundColor: assignment.label?.color + '20', color: assignment.label?.color, borderColor: assignment.label?.color + '40' }}
+                      className="border group"
+                    >
+                      {assignment.label?.name}
+                      <X
+                        size={10}
+                        className="ml-1 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => {
+                          const newIds = taskLabels.filter(l => l.label_id !== assignment.label_id).map(l => l.label_id);
+                          updateTaskLabelsMutation.mutate({
+                            taskId: task.id,
+                            orgId: task.org_id,
+                            labelIds: newIds,
+                            projectId: task.project_id
+                          });
+                        }}
+                      />
+                    </Badge>
+                  ))
+                ) : (
+                  <span className="text-xs text-muted italic">No labels</span>
+                )}
+              </div>
+              {isLabelSelectorOpen && (
+                <div className="absolute top-0 left-0 mt-2 w-48 bg-white border border-border rounded-lg shadow-lg z-20 p-2">
+                  <p className="text-[10px] font-bold text-muted uppercase px-2 mb-2">Project Labels</p>
+                  <div className="space-y-1">
+                    {projectLabels?.map(label => (
+                      <button
+                        key={label.id}
+                        className={cn(
+                          "w-full flex items-center gap-2 p-2 rounded hover:bg-surface-2 text-left text-xs",
+                          taskLabels?.some(l => l.label_id === label.id) ? "bg-accent/10 text-accent" : "text-primary"
+                        )}
+                        onClick={() => {
+                          const currentIds = taskLabels?.map(l => l.label_id) || [];
+                          const newIds = currentIds.includes(label.id)
+                            ? currentIds.filter(id => id !== label.id)
+                            : [...currentIds, label.id];
+                          updateTaskLabelsMutation.mutate({
+                            taskId: task.id,
+                            orgId: task.org_id,
+                            labelIds: newIds,
+                            projectId: task.project_id
+                          });
+                        }}
+                      >
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: label.color }} />
+                        <span className="flex-1">{label.name}</span>
+                        {taskLabels?.some(l => l.label_id === label.id) && <CheckSquare size={12} />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
