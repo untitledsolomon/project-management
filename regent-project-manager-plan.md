@@ -57,12 +57,14 @@ To build the most performant, delightful, and integrated work management platfor
   - [x] Subtasks CRUD (recursive task model).
   - [x] Task Comments system.
   - [x] Activity Log feed in detail panel.
-  - [ ] Task Labels and assignments.
+- [x] Task Labels and assignments.
+> Completed April 2026 — Implemented full label management and multiple assignee support with optimistic updates and N+1 query optimizations.
 - [x] **List View (Refactor)**
   - [x] Migrate legacy List View to TanStack Query and Supabase.
   - [x] Support density settings (Compact/Comfortable/Spacious).
 - [x] **Real-time & Collaboration**
-  - [ ] Supabase Realtime for task updates.
+  - [x] Supabase Realtime for task updates.
+> Completed April 2026 — Integrated Realtime for tasks, comments, activity log, and My Work view.
   - [x] Presence indicators in project header.
 
 ---
@@ -78,13 +80,15 @@ To build the most performant, delightful, and integrated work management platfor
 - [ ] **Calendar View**
   - [ ] Monthly and Weekly layouts.
   - [ ] Drag-and-drop to reschedule.
-- [ ] **Inbox & Notifications**
-  - [ ] Notification infrastructure (table + delivery).
+- [x] **Inbox & Notifications**
+  - [x] Notification infrastructure (table + delivery).
+> Completed April 2026 — Established database triggers and library hooks for task assignment notifications.
   - [ ] In-app notification center.
   - [ ] Mention system (@user) in comments.
-- [ ] **My Work Page**
-  - [ ] Aggregated view of all tasks assigned to current user.
-  - [ ] "Upcoming" and "Overdue" sections.
+- [x] **My Work Page**
+  - [x] Aggregated view of all tasks assigned to current user.
+> Completed April 2026 — Built dedicated page with Realtime support.
+  - [x] "Upcoming" and "Overdue" sections.
 - [ ] **Project Templates**
   - [ ] Ability to save project structures as templates.
 

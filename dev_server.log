@@ -7,9 +7,9 @@
    - Network:      http://192.168.0.2:3000
 
  ✓ Starting...
- ✓ Ready in 1860ms
- ○ Compiling /projects/[id] ...
- ✓ Compiled /projects/[id] in 11.4s (1177 modules)
+ ✓ Ready in 2.5s
+ ○ Compiling /my-work ...
+ ✓ Compiled /my-work in 4s (1064 modules)
 Supabase credentials missing. Data persistence will be disabled.
- GET /projects/mock-project 200 in 14301ms
- ✓ Compiled in 464ms (568 modules)
+ GET /my-work 200 in 4910ms
+ ✓ Compiled in 1365ms (530 modules)

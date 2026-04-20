@@ -9,7 +9,8 @@ import { DueDateBadge } from "@/components/ui/DueDateBadge";
 import { Avatar, AvatarGroup } from "@/components/ui/Avatar";
 import { MessageSquare, Paperclip, CheckSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSubtasks, useTaskComments } from "@/lib/tasks/queries";
+import { useSubtasks, useTaskComments, useLabelsForTask, useProjectMembers } from "@/lib/tasks/queries";
+import { Badge } from "@/components/ui/Badge";
 
 interface TaskCardProps {
   task: Task;
@@ -20,6 +21,8 @@ interface TaskCardProps {
 export function TaskCard({ task, isOverlay, onClick }: TaskCardProps) {
   const { data: subtasks } = useSubtasks(task.id);
   const { data: comments } = useTaskComments(task.id);
+  const { data: labels } = useLabelsForTask(task.id);
+  const { data: projectMembers } = useProjectMembers(task.project_id);
 
   const subtasksCount = subtasks?.length || 0;
   const subtasksCompleted = subtasks?.filter(s => s.status === 'done').length || 0;
@@ -74,9 +77,21 @@ export function TaskCard({ task, isOverlay, onClick }: TaskCardProps) {
             </div>
           </div>
 
-          <h4 className="text-sm font-medium text-primary mb-3 line-clamp-2">
+          <h4 className="text-sm font-medium text-primary mb-2 line-clamp-2">
             {task.title}
           </h4>
+
+          <div className="flex flex-wrap gap-1 mb-3">
+            {labels?.map(assignment => (
+              <Badge
+                key={assignment.label_id}
+                style={{ backgroundColor: assignment.label?.color + '20', color: assignment.label?.color, borderColor: assignment.label?.color + '40' }}
+                className="text-[9px] px-1.5 py-0 border leading-tight"
+              >
+                {assignment.label?.name}
+              </Badge>
+            ))}
+          </div>
 
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-2">
@@ -85,9 +100,14 @@ export function TaskCard({ task, isOverlay, onClick }: TaskCardProps) {
 
             <div className="flex items-center gap-3 text-muted">
               <AvatarGroup>
-                {task.assignee_ids?.map(id => (
-                  <Avatar key={id} fallback="U" size="xs" />
-                )) || <Avatar fallback="?" size="xs" />}
+                {task.assignee_ids && task.assignee_ids.length > 0 ? (
+                  task.assignee_ids.map(id => {
+                    const member = projectMembers?.find(m => m.id === id);
+                    return <Avatar key={id} fallback={member?.full_name?.charAt(0) || "U"} size="xs" />;
+                  })
+                ) : (
+                  <Avatar fallback="?" size="xs" />
+                )}
               </AvatarGroup>
             </div>
           </div>
