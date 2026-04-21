@@ -7,8 +7,10 @@ import { useProjectSections } from "@/lib/sections/queries";
 import { useProjects } from "@/lib/projects/queries";
 import { KanbanBoard } from "@/components/views/kanban/KanbanBoard";
 import { ListView } from "@/components/views/list/ListView";
+import { TimelineView } from "@/components/views/timeline/TimelineView";
+import { CalendarView } from "@/components/views/calendar/CalendarView";
 import { Button } from "@/components/ui/Button";
-import { LayoutGrid, List, Calendar, Settings, Share2, Plus } from "lucide-react";
+import { LayoutGrid, List, Calendar, Clock, Settings, Share2, Plus } from "lucide-react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
 import { TaskDetailPanel } from "@/components/tasks/TaskDetailPanel";
@@ -68,8 +70,12 @@ export default function ProjectPage() {
               List
             </TabsTrigger>
             <TabsTrigger value="timeline" className="gap-2">
-              <Calendar size={16} />
+              <Clock size={16} />
               Timeline
+            </TabsTrigger>
+            <TabsTrigger value="calendar" className="gap-2">
+              <Calendar size={16} />
+              Calendar
             </TabsTrigger>
           </TabsList>
 
@@ -99,9 +105,23 @@ export default function ProjectPage() {
         </TabsContent>
 
         <TabsContent value="timeline" className="flex-1 min-h-0 border-none p-0 outline-none">
-          <div className="flex items-center justify-center h-full text-muted italic">
-            Timeline view coming in Phase 2
-          </div>
+          {tasks && (
+            <TimelineView
+              projectId={id as string}
+              tasks={tasks}
+              onTaskClick={(task) => setSelectedTask(task)}
+            />
+          )}
+        </TabsContent>
+
+        <TabsContent value="calendar" className="flex-1 min-h-0 border-none p-0 outline-none">
+          {tasks && (
+            <CalendarView
+              projectId={id as string}
+              tasks={tasks}
+              onTaskClick={(task) => setSelectedTask(task)}
+            />
+          )}
         </TabsContent>
       </Tabs>
 

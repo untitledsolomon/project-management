@@ -1,10 +1,14 @@
 "use client";
 
-import { Search, Bell, Plus, User } from "lucide-react";
+import { Search, Plus, User } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { NotificationCenter } from "./NotificationCenter";
+import { useAuth } from "@/hooks/useAuth";
 
 export function Topbar() {
+  const { user, role } = useAuth();
+
   return (
     <header className="h-14 border-b border-border bg-white sticky top-0 z-10 px-6 flex items-center justify-between">
       <div className="flex-1 max-w-md">
@@ -23,21 +27,22 @@ export function Topbar() {
             <Plus size={16} />
             Quick Add
           </Button>
-          <Button variant="ghost" size="sm" className="relative p-2">
-            <Bell size={18} />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-p1 rounded-full border-2 border-white"></span>
-          </Button>
+          <NotificationCenter />
         </div>
 
         <div className="w-px h-6 bg-border mx-2"></div>
 
         <div className="flex items-center gap-2">
           <div className="text-right hidden sm:block">
-            <p className="text-xs font-medium text-primary">Solomon Kani</p>
-            <p className="text-[10px] text-secondary uppercase">Owner</p>
+            <p className="text-xs font-medium text-primary">{user?.full_name || "Guest"}</p>
+            <p className="text-[10px] text-secondary uppercase">{role || "Member"}</p>
           </div>
-          <div className="w-8 h-8 rounded-full bg-surface-2 border border-border flex items-center justify-center text-secondary">
-            <User size={16} />
+          <div className="w-8 h-8 rounded-full bg-surface-2 border border-border flex items-center justify-center text-secondary overflow-hidden">
+            {user?.avatar_url ? (
+              <img src={user.avatar_url} alt={user.full_name} className="w-full h-full object-cover" />
+            ) : (
+              <User size={16} />
+            )}
           </div>
         </div>
       </div>

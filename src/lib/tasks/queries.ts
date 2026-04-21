@@ -70,6 +70,17 @@ export interface TaskLabelAssignment {
   label?: TaskLabel;
 }
 
+export interface TaskDependency {
+  id: string;
+  source_task_id: string;
+  target_task_id: string;
+  dependency_type: 'finish_to_start' | 'start_to_start' | 'finish_to_finish' | 'start_to_finish';
+  org_id: string;
+  created_at: string;
+  source_task?: Task;
+  target_task?: Task;
+}
+
 export interface PublicUser {
   id: string;
   org_id: string;
@@ -284,9 +295,23 @@ export function useCreateComment() {
 
       if (error) throw error;
 
-      // We need project_id for activity logging, but it's not in the comment table
-      // Let's fetch the task first or just log without it if necessary.
-      // For now, assume it's passed or available.
+      // Notify mentioned users
+      const mentions = newComment.body?.match(/data-mention-id="([^"]+)"/g);
+      if (mentions) {
+        const userIds = mentions.map(m => m.match(/"([^"]+)"/)?.[1]).filter(Boolean) as string[];
+        const uniqueUserIds = Array.from(new Set(userIds));
+
+        for (const userId of uniqueUserIds) {
+          await supabase.from('notifications').insert({
+            org_id: newComment.org_id,
+            user_id: userId,
+            type: 'mention',
+            title: 'You were mentioned in a comment',
+            body: newComment.body?.replace(/<[^>]*>/g, '').slice(0, 100),
+            data: { task_id: newComment.task_id }
+          });
+        }
+      }
 
       return data as Comment;
     },
@@ -650,6 +675,129 @@ export function useMyWorkTasks() {
   }, [queryClient]);
 
   return query;
+}
+
+export function useTaskDependencies(taskId: string) {
+  return useQuery({
+    queryKey: ['dependencies', taskId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('task_dependencies')
+        .select(`
+          *,
+          source_task:tasks!task_dependencies_source_task_id_fkey(*),
+          target_task:tasks!task_dependencies_target_task_id_fkey(*)
+        `)
+        .or(`source_task_id.eq.${taskId},target_task_id.eq.${taskId}`);
+
+      if (error) throw error;
+      return data as TaskDependency[];
+    },
+    enabled: !!taskId,
+  });
+}
+
+export function useCreateDependency() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    onMutate: async (newDep) => {
+      await queryClient.cancelQueries({ queryKey: ['dependencies', newDep.source_task_id] });
+      await queryClient.cancelQueries({ queryKey: ['dependencies', newDep.target_task_id] });
+
+      const prevSource = queryClient.getQueryData(['dependencies', newDep.source_task_id]);
+      const prevTarget = queryClient.getQueryData(['dependencies', newDep.target_task_id]);
+
+      const optimisticDep = { ...newDep, id: 'temp-id', created_at: new Date().toISOString() } as TaskDependency;
+
+      queryClient.setQueryData(['dependencies', newDep.source_task_id], (old: TaskDependency[] | undefined) => [...(old || []), optimisticDep]);
+      queryClient.setQueryData(['dependencies', newDep.target_task_id], (old: TaskDependency[] | undefined) => [...(old || []), optimisticDep]);
+
+      return { prevSource, prevTarget, newDep };
+    },
+    onError: (err, newDep, context) => {
+      if (context) {
+        queryClient.setQueryData(['dependencies', context.newDep.source_task_id], context.prevSource);
+        queryClient.setQueryData(['dependencies', context.newDep.target_task_id], context.prevTarget);
+      }
+    },
+    mutationFn: async (newDep: Partial<TaskDependency>) => {
+      const { data, error } = await supabase
+        .from('task_dependencies')
+        .insert(newDep)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Log activity for both tasks
+      const { data: sourceTask } = await supabase.from('tasks').select('project_id').eq('id', data.source_task_id).single();
+      const { data: targetTask } = await supabase.from('tasks').select('project_id').eq('id', data.target_task_id).single();
+
+      if (sourceTask) {
+        await logActivity(data.org_id, sourceTask.project_id, data.source_task_id, 'update', 'dependency', undefined, `Blocks ${data.target_task_id}`);
+      }
+      if (targetTask) {
+        await logActivity(data.org_id, targetTask.project_id, data.target_task_id, 'update', 'dependency', undefined, `Blocked by ${data.source_task_id}`);
+      }
+
+      return data as TaskDependency;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['dependencies', data.source_task_id] });
+      queryClient.invalidateQueries({ queryKey: ['dependencies', data.target_task_id] });
+    },
+  });
+}
+
+export function useDeleteDependency() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    onMutate: async ({ id, sourceId, targetId }) => {
+      await queryClient.cancelQueries({ queryKey: ['dependencies', sourceId] });
+      await queryClient.cancelQueries({ queryKey: ['dependencies', targetId] });
+
+      const prevSource = queryClient.getQueryData(['dependencies', sourceId]);
+      const prevTarget = queryClient.getQueryData(['dependencies', targetId]);
+
+      queryClient.setQueryData(['dependencies', sourceId], (old: TaskDependency[] | undefined) => old?.filter(d => d.id !== id));
+      queryClient.setQueryData(['dependencies', targetId], (old: TaskDependency[] | undefined) => old?.filter(d => d.id !== id));
+
+      return { prevSource, prevTarget, sourceId, targetId };
+    },
+    onError: (err, variables, context) => {
+      if (context) {
+        queryClient.setQueryData(['dependencies', context.sourceId], context.prevSource);
+        queryClient.setQueryData(['dependencies', context.targetId], context.prevTarget);
+      }
+    },
+    mutationFn: async ({ id, sourceId, targetId }: { id: string, sourceId: string, targetId: string }) => {
+      // Get data for logging before delete
+      const { data: dep } = await supabase.from('task_dependencies').select('*').eq('id', id).single();
+
+      const { error } = await supabase.from('task_dependencies').delete().eq('id', id);
+      if (error) throw error;
+
+      if (dep) {
+        const { data: sourceTask } = await supabase.from('tasks').select('project_id').eq('id', sourceId).single();
+        const { data: targetTask } = await supabase.from('tasks').select('project_id').eq('id', targetId).single();
+
+        if (sourceTask) {
+          await logActivity(dep.org_id, sourceTask.project_id, sourceId, 'update', 'dependency', `Blocks ${targetId}`, undefined);
+        }
+        if (targetTask) {
+          await logActivity(dep.org_id, targetTask.project_id, targetId, 'update', 'dependency', `Blocked by ${sourceId}`, undefined);
+        }
+      }
+
+      return { sourceId, targetId };
+    },
+    onSuccess: ({ sourceId, targetId }) => {
+      queryClient.invalidateQueries({ queryKey: ['dependencies', sourceId] });
+      queryClient.invalidateQueries({ queryKey: ['dependencies', targetId] });
+    },
+  });
 }
 
 export function useDeleteTask() {

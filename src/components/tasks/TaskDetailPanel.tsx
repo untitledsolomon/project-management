@@ -11,13 +11,17 @@ import {
   useTaskLabels,
   useLabelsForTask,
   useUpdateTaskLabels,
-  useProjectMembers
+  useProjectMembers,
+  useTaskDependencies,
+  useCreateDependency,
+  useDeleteDependency,
+  useProjectTasks
 } from "@/lib/tasks/queries";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { PriorityBadge } from "@/components/ui/PriorityBadge";
 import { DueDateBadge } from "@/components/ui/DueDateBadge";
 import { Avatar } from "@/components/ui/Avatar";
-import { X, CheckSquare, MessageSquare, Clock, Plus, Send, Tag, Users } from "lucide-react";
+import { X, CheckSquare, MessageSquare, Clock, Plus, Send, Tag, Users, Link2, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
@@ -33,6 +37,8 @@ export function TaskDetailPanel({ task, onClose }: TaskDetailPanelProps) {
   const createTaskMutation = useCreateTask();
   const createCommentMutation = useCreateComment();
   const updateTaskLabelsMutation = useUpdateTaskLabels();
+  const createDependencyMutation = useCreateDependency();
+  const deleteDependencyMutation = useDeleteDependency();
 
   const { data: subtasks } = useSubtasks(task?.id || "");
   const { data: activity } = useTaskActivity(task?.id || "");
@@ -40,11 +46,14 @@ export function TaskDetailPanel({ task, onClose }: TaskDetailPanelProps) {
   const { data: projectLabels } = useTaskLabels(task?.project_id || "");
   const { data: taskLabels } = useLabelsForTask(task?.id || "");
   const { data: projectMembers } = useProjectMembers(task?.project_id || "");
+  const { data: projectTasks } = useProjectTasks(task?.project_id || "");
+  const { data: dependencies } = useTaskDependencies(task?.id || "");
 
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
   const [newComment, setNewComment] = useState("");
   const [isLabelSelectorOpen, setIsLabelSelectorOpen] = useState(false);
   const [isAssigneeSelectorOpen, setIsAssigneeSelectorOpen] = useState(false);
+  const [isDependencySelectorOpen, setIsDependencySelectorOpen] = useState(false);
 
   if (!task) return null;
 
@@ -267,7 +276,79 @@ export function TaskDetailPanel({ task, onClose }: TaskDetailPanelProps) {
             <RichTextEditor
               content={task.description || ""}
               onChange={handleDescriptionChange}
+              mentions={projectMembers?.map(m => ({ id: m.id, label: m.full_name }))}
             />
+          </div>
+
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-semibold text-primary flex items-center gap-2">
+                <Link2 size={16} />
+                Dependencies
+              </h4>
+              <button
+                onClick={() => setIsDependencySelectorOpen(!isDependencySelectorOpen)}
+                className="p-1 hover:bg-surface-2 rounded text-muted hover:text-accent transition-colors"
+              >
+                <Plus size={14} />
+              </button>
+            </div>
+
+            <div className="relative">
+              {isDependencySelectorOpen && (
+                <div className="absolute top-0 right-0 mt-2 w-64 bg-white border border-border rounded-lg shadow-lg z-20 p-2">
+                  <p className="text-[10px] font-bold text-muted uppercase px-2 mb-2">Block this task with...</p>
+                  <div className="space-y-1 max-h-48 overflow-y-auto">
+                    {projectTasks?.filter(t => t.id !== task.id).map(t => (
+                      <button
+                        key={t.id}
+                        className="w-full flex flex-col p-2 rounded hover:bg-surface-2 text-left"
+                        onClick={() => {
+                          createDependencyMutation.mutate({
+                            source_task_id: t.id,
+                            target_task_id: task.id,
+                            org_id: task.org_id,
+                            dependency_type: 'finish_to_start'
+                          });
+                          setIsDependencySelectorOpen(false);
+                        }}
+                      >
+                        <span className="text-xs font-medium text-primary truncate">{t.title}</span>
+                        <span className="text-[10px] text-muted">{t.status}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                {dependencies && dependencies.length > 0 ? (
+                  dependencies.map((dep) => {
+                    const isBlocking = dep.target_task_id === task.id;
+                    const relatedTask = isBlocking ? dep.source_task : dep.target_task;
+
+                    return (
+                      <div key={dep.id} className="flex items-center justify-between p-2 rounded-md bg-surface-1 border border-border group">
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
+                            {isBlocking ? 'Blocked by' : 'Blocks'}
+                          </span>
+                          <span className="text-xs text-primary truncate font-medium">{relatedTask?.title}</span>
+                        </div>
+                        <button
+                          onClick={() => deleteDependencyMutation.mutate({ id: dep.id, sourceId: dep.source_task_id, targetId: dep.target_task_id })}
+                          className="p-1 text-muted hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <span className="text-xs text-muted italic">No dependencies</span>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="mb-12">
