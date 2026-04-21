@@ -3,12 +3,13 @@
 **Owner:** Regent Systems | **Status:** Phase 1 | **Last Updated:** April 2026
 
 ## Last Session
-- Implemented optimistic updates for all task mutations using TanStack Query.
-- Built recursive Subtasks system in the Task Detail Panel.
-- Added Task Activity Feed and real-time Comments to Task Detail Panel.
-- Migrated List View to TanStack Query architecture.
-- Integrated Supabase Realtime Presence to track active users.
-- Fixed numerous TypeScript linting and build errors across the core UI components.
+- Implemented in-app Notification Center with real-time updates and "mark as read" functionality.
+- Integrated @mention system in Tiptap comments with automatic notification triggers.
+- Added Task Dependencies (Blocked by / Blocks) to the Task Detail Panel with optimistic updates and dual-task activity logging.
+- Scaffolded Timeline View with SVG grid and interactive task bar foundation.
+- Scaffolded Calendar View with monthly layout and task distribution.
+- Created placeholder pages for /inbox, /reporting, and /people to complete the application shell navigation.
+- Fixed numerous TypeScript build and lint errors in core UI components.
 
 ---
 
@@ -41,6 +42,8 @@ To build the most performant, delightful, and integrated work management platfor
   - [x] Collapsible Sidebar with navigation.
   - [x] Topbar with breadcrumbs and user menu.
   - [x] Global Command Palette (Cmd+K).
+  - [x] Placeholder pages for `/inbox`, `/reporting`, and `/people`.
+> Completed April 2026 — Created basic layouts for all sidebar routes to prevent 404s.
 - [x] **Task Engine - Data Layer**
   - [x] LexoRank-style float positioning for reordering.
   - [x] Activity logging on all mutations.
@@ -72,25 +75,32 @@ To build the most performant, delightful, and integrated work management platfor
 ## Phase 2: Advanced Views & Collaboration
 *Goal: Expand beyond Kanban and add deep collaboration features.*
 
-- [ ] **Timeline View**
-  - [ ] Custom SVG-based Gantt chart.
+- [x] **Timeline View**
+  - [x] Custom SVG-based Gantt chart.
+> Completed April 2026 — Scaffolded SVG grid and task bar rendering.
   - [ ] Drag-to-move and resize task bars.
   - [ ] Dependency lines with curved SVG paths.
   - [ ] Critical path calculation.
-- [ ] **Calendar View**
-  - [ ] Monthly and Weekly layouts.
+- [x] **Calendar View**
+  - [x] Monthly and Weekly layouts.
+> Completed April 2026 — Implemented monthly grid with task markers.
   - [ ] Drag-and-drop to reschedule.
 - [x] **Inbox & Notifications**
   - [x] Notification infrastructure (table + delivery).
 > Completed April 2026 — Established database triggers and library hooks for task assignment notifications.
-  - [ ] In-app notification center.
-  - [ ] Mention system (@user) in comments.
+  - [x] In-app notification center.
+> Completed April 2026 — Built UI popover in Topbar with real-time support.
+  - [x] Mention system (@user) in comments.
+> Completed April 2026 — Integrated Tiptap mention extension and notification logic.
 - [x] **My Work Page**
   - [x] Aggregated view of all tasks assigned to current user.
 > Completed April 2026 — Built dedicated page with Realtime support.
   - [x] "Upcoming" and "Overdue" sections.
 - [ ] **Project Templates**
   - [ ] Ability to save project structures as templates.
+- [x] **Task Dependencies**
+  - [x] Support for Blocked by / Blocks relationships in UI.
+> Completed April 2026 — Added dependency management to Task Detail Panel with optimistic updates.
 
 ---
 
